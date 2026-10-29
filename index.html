@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#D9161D">
+<title>Painel da recepção | MedicMais Sobradinho</title>
+<link rel="icon" href="img/simbolo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Figtree:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ícones (sprite) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-dash" viewBox="0 0 24 24"><rect x="3" y="3" width="7.5" height="9" rx="2"/><rect x="13.5" y="3" width="7.5" height="5.5" rx="2"/><rect x="13.5" y="11.5" width="7.5" height="9.5" rx="2"/><rect x="3" y="15" width="7.5" height="6" rx="2"/></symbol>
+    <symbol id="i-cal" viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="16.5" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></symbol>
+    <symbol id="i-chat" viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v8a2.5 2.5 0 0 1-2.5 2.5H11l-4.5 4v-4h0A2.5 2.5 0 0 1 4 13.5z"/></symbol>
+    <symbol id="i-funnel" viewBox="0 0 24 24"><path d="M3 4.5h18l-6.8 8v6.2l-4.4 2v-8.2z"/></symbol>
+    <symbol id="i-out" viewBox="0 0 24 24"><path d="M14 4h4.5A1.5 1.5 0 0 1 20 5.5v13a1.5 1.5 0 0 1-1.5 1.5H14M10 16l-4-4 4-4M6 12h10"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-left" viewBox="0 0 24 24"><path d="m14.5 5-7 7 7 7"/></symbol>
+    <symbol id="i-right" viewBox="0 0 24 24"><path d="m9.5 5 7 7-7 7"/></symbol>
+    <symbol id="i-send" viewBox="0 0 24 24"><path d="M21 3 10 14M21 3l-7 18-4-7-7-4z"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c.8-4 4-6 8-6s7.2 2 8 6"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3.5 2.8 19.5h18.4zM12 10v4.5M12 17.2v.1"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></symbol>
+    <symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3"/></symbol>
+    <symbol id="i-cam" viewBox="0 0 24 24"><path d="M4 8.5A1.5 1.5 0 0 1 5.5 7h2l1.4-2h6.2l1.4 2h2A1.5 1.5 0 0 1 20 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 17.5z"/><circle cx="12" cy="13" r="3.4"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 17V11a6 6 0 0 1 12 0v6l1.5 2h-15zM10 21h4"/></symbol>
+    <symbol id="i-bell-off" viewBox="0 0 24 24"><path d="M6 17V11a6 6 0 0 1 9-5.2M18 11v6l1.5 2H6M10 21h4M3.5 3.5l17 17"/></symbol>
+    <symbol id="i-edit" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16zM13.5 6.5l4 4"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4.5h6V7M6.5 7l1 13h9l1-13M10 11v6M14 11v6"/></symbol>
+    <symbol id="i-up" viewBox="0 0 24 24"><path d="m5 14.5 7-7 7 7"/></symbol>
+    <symbol id="i-down" viewBox="0 0 24 24"><path d="m5 9.5 7 7 7-7"/></symbol>
+    <symbol id="i-wa" viewBox="0 0 24 24"><path d="M12 2.5a9.4 9.4 0 0 0-8 14.3L2.6 21.5l4.8-1.3A9.4 9.4 0 1 0 12 2.5z"/><path d="M8.7 8.2c.3-.6.6-.6.9-.6h.5c.2 0 .4.1.5.4l.8 1.8c.1.3 0 .5-.2.7l-.6.7c.8 1.5 1.900 2.400 3.300 3.100l.8-.9c.2-.2.4-.3.7-.2l1.800.9c.3.1.4.3.4.5 0 .6-.3 1.300-1 1.700-.700.400-1.500.4-2.400.1-2.800-1-5-3.200-5.800-5.700-.3-.9-.1-1.700.4-2.300z"/></symbol>
+  </defs>
+</svg>
+
+<!-- ENTRADA -->
+<section id="login" class="login" hidden>
+  <div class="login-card">
+    <img class="login-logo" src="img/logo-horizontal.png" alt="MedicMais Clínica Médica e Odontológica" width="410" height="136">
+    <h1>Painel da recepção</h1>
+    <p class="login-sub">Agenda, conversas do WhatsApp e funil de atendimento, em tempo real.</p>
+    <form id="login-form" autocomplete="off" novalidate>
+      <label for="token">Token de acesso</label>
+      <input id="token" type="password" placeholder="Cole o token da recepção" autocomplete="off" required>
+      <label class="check keep"><input type="checkbox" id="keep" checked><span>Manter conectado neste computador<small>Não pede o token de novo na próxima vez. Desmarque em computador compartilhado.</small></span></label>
+      <p id="login-error" class="form-error" role="alert" hidden></p>
+      <button class="btn btn-primary" type="submit" id="login-btn">Entrar</button>
+    </form>
+    <p class="login-foot">Não tem o token? Peça à equipe técnica da MedicMais.</p>
+  </div>
+</section>
+
+<!-- APP -->
+<div id="app" class="app" hidden>
+  <aside class="side" aria-label="Menu principal">
+    <div class="side-brand">
+      <img src="img/logo-horizontal.png" alt="MedicMais" width="410" height="136">
+      <span class="eyebrow">Sobradinho · Recepção</span>
+    </div>
+    <nav class="side-nav" id="side-nav"></nav>
+    <div class="side-foot">
+      <p class="demo-note"><i></i><span><b>Demonstração</b>Médicos, horários e pacientes de exemplo são fictícios.</span></p>
+      <span class="live" id="live"><i></i><span id="live-text">ao vivo</span></span>
+      <button class="btn-link" id="som" type="button" aria-pressed="true"><svg class="ic"><use href="#i-bell"/></svg><span class="som-t">Som dos alertas: ligado</span></button>
+      <button class="btn-link" id="logout" type="button"><svg class="ic"><use href="#i-out"/></svg>Sair</button>
+    </div>
+  </aside>
+
+  <header class="top">
+    <img class="top-logo" src="img/logo-horizontal.png" alt="MedicMais" width="410" height="136">
+    <span class="live" id="live-m"><i></i><span id="live-text-m">ao vivo</span></span>
+    <button class="icon-btn" id="som-m" type="button" aria-pressed="true" aria-label="Desligar o som dos alertas"><svg class="ic"><use href="#i-bell"/></svg></button>
+    <button class="icon-btn" id="logout-m" type="button" aria-label="Sair"><svg class="ic"><use href="#i-out"/></svg></button>
+    <p class="demo-strip"><i></i>Demonstração: médicos, horários e pacientes de exemplo são fictícios.</p>
+  </header>
+
+  <div class="main">
+    <div id="error-box" class="alert alert-error" role="alert" hidden>
+      <svg class="ic"><use href="#i-alert"/></svg>
+      <span id="error-msg">Sem conexão com o servidor. Confira sua internet; o painel tenta de novo sozinho a cada poucos segundos.</span>
+      <button class="btn btn-ghost btn-sm" id="retry" type="button">Tentar agora</button>
+    </div>
+
+    <section id="v-dashboard" class="view" aria-labelledby="t-dashboard"></section>
+    <section id="v-agenda" class="view" aria-labelledby="t-agenda" hidden></section>
+    <section id="v-conversas" class="view" aria-labelledby="t-conversas" hidden></section>
+    <section id="v-funil" class="view" aria-labelledby="t-funil" hidden></section>
+  </div>
+
+  <nav class="tabbar" id="tabbar" aria-label="Menu principal"></nav>
+</div>
+
+<!-- MODAL -->
+<div id="modal" class="modal" hidden>
+  <div class="modal-bg" data-close="1"></div>
+  <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="modal-title" tabindex="-1">
+    <div class="modal-head"><h2 id="modal-title"></h2><button class="icon-btn" type="button" data-close="1" aria-label="Fechar"><svg class="ic"><use href="#i-x"/></svg></button></div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<div id="toasts" class="toasts" role="status" aria-live="polite"></div>
+<script src="app.js"></script>
+</body>
+</html>
