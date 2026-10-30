@@ -1,4 +1,5 @@
 import { q, rota, hojeSP, ETAPAS, COLS_AG, FROM_AG } from './_lib.js';
+import { sigmaAtivo, agendaSigma, ATIVO } from './_sigma.js';
 
 export default rota({
   GET: async () => {
@@ -66,7 +67,7 @@ export default rota({
     const mapaSemana = Object.fromEntries(semana.map((r) => [r.profissional_id, r.n]));
     const por_profissional = profs.map((p) => ({ id: p.id, titulo: p.titulo, nome: p.nome, especialidade: p.especialidade, cor: p.cor, n: mapaSemana[p.id] || 0 }));
     const mapaFunil = Object.fromEntries(funil.map((f) => [f.etapa, f.n]));
-    return {
+    const out = {
       hoje: hoje.d, agora: hoje.h,
       kpis: {
         conversas_hoje: k.conversas_hoje, agendados_hoje: k.agendados_hoje, consultas_semana: k.consultas_semana,
@@ -78,5 +79,52 @@ export default rota({
       por_servico: porServico,
       feed, humano, proximas, servicos, profissionais_hoje, por_profissional
     };
+    if (sigmaAtivo()) {
+      let sg;
+      try { sg = await resumoSigma(hoje); } catch (e) {
+        // sem o Sigma, não mostra agenda inventada: zera os blocos de agenda e avisa
+        sg = { agendados_hoje: 0, consultas_semana: 0, proximas: [], profissionais_hoje: [], por_profissional: [], proximos7: out.proximos7.map((d) => ({ dia: d.dia, n: 0 })) };
+        out.sigma_erro = e.message || 'Não consegui ler a agenda do Sigma.';
+      }
+      out.kpis.agendados_hoje = sg.agendados_hoje; out.kpis.consultas_semana = sg.consultas_semana;
+      Object.assign(out, { fonte: 'sigma', proximos7: sg.proximos7, proximas: sg.proximas, profissionais_hoje: sg.profissionais_hoje, por_profissional: sg.por_profissional });
+    }
+    return out;
   }
 });
+
+const addDias = (d, n) => new Date(Date.parse(d + 'T12:00:00Z') + n * 86400000).toISOString().slice(0, 10);
+const toMin = (h) => Number(h.slice(0, 2)) * 60 + Number(h.slice(3, 5));
+const fmtMin = (m) => String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0');
+
+/** Blocos de agenda do resumo vindos do Sigma (agenda real). Conversas, funil e conversão seguem do Neon (o robô). */
+async function resumoSigma(hoje) {
+  const dow = new Date(hoje.d + 'T12:00:00Z').getUTCDay();
+  const seg = addDias(hoje.d, -((dow + 6) % 7)), dom = addDias(seg, 6);
+  const ate = addDias(hoje.d, 6) > dom ? addDias(hoje.d, 6) : dom;
+  const { profissionais, agendamentos, horarios } = await agendaSigma(seg < hoje.d ? seg : hoje.d, ate);
+  const ativos = agendamentos.filter((a) => ATIVO(a.status));
+  const doDia = ativos.filter((a) => a.data === hoje.d);
+  const agora = toMin(hoje.h);
+  const profissionais_hoje = profissionais.map((p) => {
+    const meus = doDia.filter((a) => a.profissional.id === p.id);
+    const slots = horarios.filter((h) => h.profissional_id === p.id && h.data === hoje.d && h.situacao !== 'bloqueado' && h.situacao !== 'cancelado' && h.situacao !== 'faltou');
+    const expediente = slots.reduce((t, h) => t + h.duracao_min, 0);
+    const ocupado = meus.reduce((t, a) => t + a.duracao_min, 0);
+    const prox = meus.find((a) => toMin(a.hora) + a.duracao_min > agora && a.status !== 'atendido');
+    return { id: p.id, titulo: p.titulo, nome: p.nome, especialidade: p.especialidade, cor: p.cor, servico: p.servico,
+      consultas: meus.length, atendidas: meus.filter((a) => a.status === 'atendido').length,
+      expediente_min: expediente, ocupado_min: ocupado, ocupacao: expediente ? Math.min(100, Math.round(ocupado / expediente * 100)) : 0,
+      inicio: slots.length ? slots[0].hora : null, fim: slots.length ? fmtMin(toMin(slots[slots.length - 1].hora) + slots[slots.length - 1].duracao_min) : null,
+      atende_hoje: slots.length > 0, proxima: prox ? { hora: prox.hora, nome: prox.nome } : null };
+  });
+  const semana = ativos.filter((a) => a.data >= seg && a.data <= dom);
+  return {
+    agendados_hoje: doDia.length,
+    proximos7: Array.from({ length: 7 }, (_, i) => { const d = addDias(hoje.d, i); return { dia: d, n: ativos.filter((a) => a.data === d).length }; }),
+    proximas: doDia.slice(0, 8),
+    profissionais_hoje,
+    por_profissional: profissionais.map((p) => ({ id: p.id, titulo: p.titulo, nome: p.nome, especialidade: p.especialidade, cor: p.cor, n: semana.filter((a) => a.profissional.id === p.id).length })),
+    consultas_semana: semana.length
+  };
+}
