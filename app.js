@@ -447,7 +447,7 @@
      ===================================================================== */
   function loadDashboard() {
     return api('GET', '/api/resumo').then((r) => {
-      S.resumo = r; S.servicos = r.servicos || S.servicos; if (r.profissionais_hoje) S.profs = r.profissionais_hoje.map((p) => ({ id: p.id, titulo: p.titulo, nome: p.nome, especialidade: p.especialidade, cor: p.cor, servico: p.servico })); setHumano(r.kpis.humano_aberto);
+      S.resumo = r; S.servicos = r.servicos || S.servicos; marcaFonte(r); if (r.profissionais_hoje) S.profs = r.profissionais_hoje.map((p) => ({ id: p.id, titulo: p.titulo, nome: p.nome, especialidade: p.especialidade, cor: p.cor, servico: p.servico })); setHumano(r.kpis.humano_aberto);
       const sig = JSON.stringify([r.kpis, r.funil, r.proximos7, r.profissionais_hoje, r.por_profissional, r.feed, r.humano, r.proximas]) + Math.floor(Date.now() / 60000);
       if (sig !== S.sig.dashboard) { S.sig.dashboard = sig; renderDashboard(); }
     });
@@ -1408,6 +1408,12 @@
   document.addEventListener('dragover', (e) => { const col = e.target.closest && e.target.closest('.col'); if (col && S.drag) { e.preventDefault(); document.querySelectorAll('.col.over').forEach((x) => { if (x !== col) x.classList.remove('over'); }); col.classList.add('over'); } });
   document.addEventListener('drop', (e) => { const col = e.target.closest && e.target.closest('.col'); if (col && S.drag) { e.preventDefault(); const id = S.drag; S.drag = null; mudarEtapa(id, col.dataset.col); } });
 
+  /* Agenda ligada ao Sigma: some o aviso de demonstração; se o Sigma falhar, avisa uma vez. */
+  function marcaFonte(r) {
+    document.body.classList.toggle('fonte-sigma', !DEMO && r.fonte === 'sigma');
+    if (r.sigma_erro && !S.sigmaAvisado) { S.sigmaAvisado = true; toast('Agenda da clínica fora do ar: ' + r.sigma_erro, 'err'); }
+    if (!r.sigma_erro) S.sigmaAvisado = false;
+  }
   $('logout').onclick = $('logout-m').onclick = () => { clearToken(); if (DEMO) { location.search = ''; return; } showLogin(); };
   $('retry').onclick = () => refresh(S.view, false);
 

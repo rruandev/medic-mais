@@ -1,3 +1,4 @@
+import { sigmaAtivo } from './_sigma.js';
 import { q, rota, PROF_DE_SERVICO, HttpError, STATUS, idValido, normalizaTelefone, validarHorario, agendamentoPorId, dataValida, RE_HORA } from './_lib.js';
 
 /** Mantém a etapa do funil coerente com o que a recepção fez na agenda. */
@@ -16,8 +17,12 @@ async function sincronizaEtapa(leadId, status) {
   }
 }
 
+/* Com a agenda ligada ao Sigma, o painel só lê: marcar e alterar continuam no sistema da clínica por enquanto. */
+const SO_LEITURA = 'A agenda do painel está ligada ao sistema da clínica (Sigma) só para leitura. Por enquanto, marque ou altere a consulta direto no Sigma.';
+
 export default rota({
   POST: async ({ body }) => {
+    if (sigmaAtivo()) throw new HttpError(409, SO_LEITURA);
     const { servico, data, hora } = body;
     const status = body.status || 'agendado';
     if (!['agendado', 'confirmado'].includes(status)) throw new HttpError(400, 'Uma consulta nova só pode nascer como "agendado" ou "confirmado".');
@@ -63,6 +68,7 @@ export default rota({
   },
 
   PATCH: async ({ query, body }) => {
+    if (sigmaAtivo()) throw new HttpError(409, SO_LEITURA);
     const id = idValido(query.id);
     const atual = await agendamentoPorId(id);
     if (!atual) throw new HttpError(404, 'Consulta não encontrada. Atualize a página.');
