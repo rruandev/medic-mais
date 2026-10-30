@@ -388,6 +388,46 @@
   });
   $('som').onclick = $('som-m').onclick = alternaSom;
   atualizaSom();
+
+  /* =====================================================================
+     LIGA/DESLIGA DO ROBÔ (pausado: a mensagem do paciente chega aqui, mas o robô não responde)
+     ===================================================================== */
+  const ROBO = { ativo: null, salvando: false };
+  function atualizaRobo() {
+    const on = ROBO.ativo !== false;
+    const b = $('robo'), m = $('robo-m');
+    [b, m].forEach((x) => { if (!x) return; x.hidden = ROBO.ativo === null; x.disabled = ROBO.salvando; x.setAttribute('aria-pressed', String(on)); x.classList.toggle('off', !on); });
+    if (b) {
+      b.querySelector('.robo-t').textContent = on ? 'Robô: ligado' : 'Robô: pausado';
+      b.querySelector('.robo-a').textContent = on ? 'Pausar' : 'Reativar';
+      b.title = on ? 'O robô está respondendo os pacientes no WhatsApp' : 'Robô pausado: a recepção responde pelo painel';
+    }
+    if (m) { m.setAttribute('aria-label', on ? 'Robô ligado. Pausar o robô' : 'Robô pausado. Reativar o robô'); m.title = on ? 'Robô ligado' : 'Robô pausado'; }
+  }
+  function lerRobo() {
+    if (!S.started || ROBO.salvando) return;
+    api('GET', '/api/robo').then((r) => { if (!ROBO.salvando) { ROBO.ativo = !!r.ativo; atualizaRobo(); } }).catch(() => {});
+  }
+  async function salvarRobo(ativo) {
+    ROBO.salvando = true; atualizaRobo();
+    try {
+      const r = await api('POST', '/api/robo', { ativo });
+      ROBO.ativo = !!r.ativo;
+      toast(ROBO.ativo ? 'Robô reativado. Ele volta a responder os pacientes.' : 'Robô pausado. As mensagens continuam chegando aqui.');
+    } catch (e) { toast('Não consegui mudar o robô: ' + msgErro(e), 'err'); }
+    ROBO.salvando = false; atualizaRobo();
+  }
+  function alternaRobo() {
+    if (ROBO.ativo === null || ROBO.salvando) return;
+    if (!ROBO.ativo) { salvarRobo(true); return; }
+    openModal('Pausar o robô?', `<p>Enquanto estiver pausado, o robô <b>não responde</b> os pacientes no WhatsApp. As mensagens continuam chegando em <b>Conversas</b> para a recepção responder.</p><div class="modal-actions"><button type="button" class="btn btn-ghost" data-close="1">Cancelar</button><button type="button" class="btn btn-danger" data-robo-pausar="1">Pausar robô</button></div>`);
+  }
+  document.addEventListener('click', (e) => {
+    if (!(e.target.closest && e.target.closest('[data-robo-pausar]'))) return;
+    closeModal(); salvarRobo(false);
+  });
+  $('robo').onclick = $('robo-m').onclick = alternaRobo;
+  setInterval(lerRobo, 30000);
   document.addEventListener('visibilitychange', () => { if (!document.hidden && S.started) refresh(S.view, true); });
   setInterval(() => { if (S.started && S.view === 'agenda') updateNowLine(); }, 30000);
 
@@ -1389,7 +1429,7 @@
   function start() {
     $('login').hidden = true; $('app').hidden = false;
     S.started = true;
-    AL.ids = null; AL.maxIn = null; pollHumano(); pedePermissaoNotificacao(); ofereceSom();
+    AL.ids = null; AL.maxIn = null; pollHumano(); pedePermissaoNotificacao(); ofereceSom(); lerRobo();
     const h = (location.hash || '').replace(/^#\/?/, '').split('?')[0];
     renderNav();
     setLive(true);
@@ -1503,6 +1543,7 @@
       if (p === '/api/contexto') return rotaContexto(method, q, body);
       if (p === '/api/humano') return { ultima_in: (() => { const m = db.msgs.filter((x) => x.direcao === 'in').sort((a, b) => b.id - a.id)[0]; return m ? { id: m.id, telefone: m.telefone } : null; })(), humano: db.leads.filter((l) => l.precisa_humano).map((l) => ({ id: l.id, telefone: l.telefone, nome: l.nome, motivo_humano: l.motivo_humano, etapa: l.etapa, atualizado_em: l.atualizado_em })) };
       if (p === '/api/profissionais') return { profissionais: PROFS };
+      if (p === '/api/robo') { if (method === 'POST') db.robo = !!body.ativo; return { ativo: db.robo !== false }; }
       if (p === '/api/agenda') { const i = q.get('inicio'), f = q.get('fim'); return { inicio: i, fim: f, profissionais: PROFS, agendamentos: db.ags.filter((a) => a.data >= i && a.data <= f).sort((a, b) => (a.data + a.hora).localeCompare(b.data + b.hora)).map(snap), servicos: SVS.map((s) => Object.assign({}, s)) }; }
       if (p === '/api/leads' && method === 'GET') return { leads: db.leads.slice().sort((a, b) => (b.precisa_humano - a.precisa_humano) || (new Date(b.atualizado_em) - new Date(a.atualizado_em))) };
       if (p === '/api/leads') { const l = db.leads.find((x) => String(x.id) === q.get('id')); if (!l) throw new ApiError(404, 'Contato não encontrado.'); if (body.etapa) l.etapa = body.etapa; if (typeof body.precisa_humano === 'boolean') l.precisa_humano = body.precisa_humano; l.atualizado_em = iso(0); return { lead: l }; }
