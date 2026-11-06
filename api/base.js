@@ -13,13 +13,20 @@ async function garantir() {
   for (const c of Object.keys(ARQ)) if (!tem.has(c)) await q('insert into robo_base (chave, dados, atualizado_por) values ($1, $2::jsonb, $3) on conflict do nothing', [c, JSON.stringify(arquivo(c)), 'documentos da clínica']);
 }
 
+/* Documentos originais da clínica (apostila, scripts, tabela, convênios): guardados no banco, nunca apagados pelo painel. */
+async function garantirDocs() {
+  await q(`create table if not exists robo_documentos (id bigserial primary key, nome text not null, tipo text not null, descricao text,
+    fonte text, conteudo bytea not null, tamanho int not null, sha256 text unique, enviado_em timestamptz not null default now(), enviado_por text)`);
+}
+const listarDocs = async () => { await garantirDocs(); return q('select id, nome, tipo, descricao, fonte, tamanho, enviado_em, enviado_por from robo_documentos order by enviado_em, id'); };
+
 async function ler() {
   await garantir();
   const rows = await q('select chave, dados, atualizado_em from robo_base');
   const d = Object.fromEntries(rows.map((r) => [r.chave, r.dados]));
   const ultima = rows.reduce((m, r) => (!m || r.atualizado_em > m ? r.atualizado_em : m), null);
   const k = d.conhecimento, c = d.convenios;
-  return { versao: k.versao, atualizado_em: ultima, itens: k.itens, convenios: c.convenios, regra_convenio: c.regra, precos: d.precos, textos_ativos: d.textos_ativos };
+  return { versao: k.versao, fontes: k.fontes || {}, documentos: await listarDocs(), atualizado_em: ultima, itens: k.itens, convenios: c.convenios, regra_convenio: c.regra, precos: d.precos, textos_ativos: d.textos_ativos };
 }
 
 const txt = (v, max = 4000) => typeof v === 'string' && v.trim().length > 0 && v.length <= max;
@@ -31,7 +38,26 @@ const VALIDA = {
 };
 
 export default rota({
-  GET: ler,
+  GET: async ({ query }) => {
+    if (!query.doc) return ler();
+    await garantirDocs();
+    const r = (await q("select nome, tipo, encode(conteudo, 'base64') as base64 from robo_documentos where id = $1", [Number(query.doc)]))[0];
+    if (!r) throw new HttpError(404, 'Documento não encontrado.');
+    return r;
+  },
+  POST: async ({ body }) => {
+    const { nome, tipo, base64, descricao, fonte } = body;
+    if (!txt(nome, 200) || !txt(base64, 4_000_000)) throw new HttpError(400, 'Escolha um arquivo de até 3 MB.');
+    const buf = Buffer.from(base64, 'base64');
+    if (!buf.length || buf.length > 3_000_000) throw new HttpError(400, 'Escolha um arquivo de até 3 MB.');
+    const { createHash } = await import('node:crypto');
+    const sha = createHash('sha256').update(buf).digest('hex');
+    await garantirDocs();
+    await q(`insert into robo_documentos (nome, tipo, descricao, fonte, conteudo, tamanho, sha256, enviado_por) values ($1, $2, $3, $4, decode($5, 'base64'), $6, $7, $8)
+      on conflict (sha256) do nothing`, [nome.slice(0, 200), String(tipo || 'application/octet-stream').slice(0, 120), descricao ? String(descricao).slice(0, 1000) : null,
+      fonte ? String(fonte).slice(0, 60) : null, base64, buf.length, sha, body.enviado_por ? String(body.enviado_por).slice(0, 80) : 'painel']);
+    return ler();
+  },
   PUT: async ({ body }) => {
     const { chave, dados } = body;
     if (!VALIDA[chave]) throw new HttpError(400, 'Parte do treinamento desconhecida.');

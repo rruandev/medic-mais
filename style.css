@@ -688,3 +688,13 @@ textarea.inpp{padding:11px 13px;min-height:84px;resize:vertical}
 .tr-lin .inp{min-height:40px;padding:0 9px;font-size:15px}
 .tr-del{margin-right:auto}
 .tr-cab{font-size:11.5px;font-weight:700;color:var(--gray);margin-bottom:2px}
+.tdocs{list-style:none;margin:0 0 12px;padding:0}
+.tdoc{padding:10px 0;border-bottom:1px solid var(--line);display:grid;gap:6px;justify-items:start}
+.tdoc-h{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.tdoc-a{display:inline-flex;align-items:center;gap:6px;border:0;background:none;padding:0;color:var(--red);font-weight:700;font-size:14px;text-align:left;cursor:pointer}
+.tdoc-a .ic{width:16px;height:16px;flex:none}
+.tdoc-a small{color:var(--gray);font-weight:500}
+.tdoc-u{color:var(--text-2);font-size:13px;line-height:1.4}
+.tdoc-up{cursor:pointer}
+.tdoc-up.is-loading{opacity:.5;pointer-events:none}
+.tag.ok{background:var(--ok-tint);color:var(--ok)}
