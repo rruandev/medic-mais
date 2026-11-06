@@ -38,5 +38,9 @@
  ["minha filha esta com dor de ouvido", "empatia"],
  ["qual o endereço?", "nao-sei"],
  ["nao é urgente, deixo pro ano que vem", "objecao-tempo"],
- ["os médicos de vocês são bons?", "consultas-valor"]
+ ["os médicos de vocês são bons?", "consultas-valor"],
+ ["quem faz os exames?", "exames-quem-faz"],
+ ["quem faz a coleta de sangue", "exames-quem-faz"],
+ ["quero marcar com o Dr. Paulo Mendes", "profissionais-ficticios"],
+ ["tem dentista Camila?", "profissionais-ficticios"]
 ]

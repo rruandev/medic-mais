@@ -1,5 +1,5 @@
 {
-  "versao": "2026-11-06",
+  "versao": "2026-11-06b",
   "fontes": {
     "apostila": "APOSTILA DE TREINAMENTO GERAL.docx (time MedicMais)",
     "fechamento": "SCRIPT O FECHAMENTO.docx (João Pedro dos Santos Lima)",
@@ -34,15 +34,15 @@
       "id": "preco-exames-laboratorio",
       "tema": "Preço de exames de sangue / laboratório",
       "gatilhos": "exame de sangue hemograma glicemia colesterol tsh vitamina laboratório check-up checkup orçamento exames pedido médico quanto custa valor",
-      "texto": "Preço de exame de laboratório vem SÓ do Sigma (ferramenta de preços). Se o Sigma não trouxer o valor, diga que vai confirmar com a equipe e passe para humano. Peça a foto do pedido médico para orçar tudo junto. Nunca fale o total parcelado: fale a parcela (ex.: '4x de R$100', nunca 'R$400 em 4x'). Antes do preço, agregue valor: análise feita pela DASA e coleta com enfermeira de mão leve.",
+      "texto": "Preço de exame de laboratório vem SÓ do Sigma (ferramenta de preços). Se o Sigma não trouxer o valor, diga que vai confirmar com a equipe e passe para humano. Peça a foto do pedido médico para orçar tudo junto. Nunca fale o total parcelado: fale a parcela (ex.: '4x de R$100', nunca 'R$400 em 4x'). Antes do preço, agregue valor: análise feita pela DASA e coleta com a Brenda Monteiro, de mão leve.",
       "fonte": "ribeiro"
     },
     {
       "id": "pagamento-formas",
       "tema": "Formas de pagamento, parcelamento e desconto",
       "gatilhos": "parcela parcelar parcelado vezes cartão crédito débito pix dinheiro à vista desconto boleto forma de pagamento aceita",
-      "texto": "Pergunte com leveza: 'Você prefere pagar em parcelinhas ou à vista com um super desconto?'. Cartão: até 12x, parcela mínima de R$100; fale sempre o valor da parcela, nunca o total. Exames à vista: 20% de desconto. Consultas particulares: 10% no Pix ou dinheiro e 7% no cartão. Não invente outro desconto nem combine condição fora disso.",
-      "fonte": "ribeiro+tabela"
+      "texto": "Pergunte com leveza: 'Você prefere pagar à vista ou em parcelinhas no cartão?'. Cartão: até 12x, parcela mínima de R$100; fale sempre o valor da parcela, nunca o total. Consulta médica NÃO tem desconto (nem no Pix, nem no dinheiro, nem no cartão): se pedirem desconto na consulta, diga com carinho que a consulta não tem desconto e ofereça o parcelamento normal no cartão (até 12x, parcela mínima de R$100). Exames à vista: 20% de desconto. Não invente outro desconto nem combine condição fora disso.",
+      "fonte": "ribeiro+tabela; Ruan 06/11: consulta sem desconto"
     },
     {
       "id": "cartao-de-todos",
@@ -84,14 +84,14 @@
       "id": "exames-valor",
       "tema": "Por que fazer os exames na MedicMais",
       "gatilhos": "por que fazer exame aqui laboratório confiável qualidade dasa resultado coleta onde fazer exames",
-      "texto": "Agregue valor antes do preço: as amostras são analisadas pela DASA, o mesmo grupo que analisa os exames de grandes laboratórios. A coleta é feita por enfermeira de mão leve, muito elogiada pelos pacientes. O preço é muito competitivo. Objetivo: fechar já e deixar o retorno com o médico agendado.",
+      "texto": "Agregue valor antes do preço: as amostras são analisadas pela DASA, o mesmo grupo que analisa os exames de grandes laboratórios. A coleta é feita pela Brenda Monteiro, de mão leve, muito elogiada pelos pacientes. O preço é muito competitivo. Objetivo: fechar já e deixar o retorno com o médico agendado.",
       "fonte": "exames+apostila"
     },
     {
       "id": "exames-medo-agulha",
       "tema": "Medo de agulha / coleta",
       "gatilhos": "medo de agulha dói picada coleta tenho pavor desmaio sangue nervoso",
-      "texto": "Acolha (é muito comum ter medo de agulha). Diga que a coleta é feita por enfermeira de mão leve e que os pacientes elogiam muito a picada. Ofereça horário tranquilo.",
+      "texto": "Acolha (é muito comum ter medo de agulha). Diga que a coleta é feita pela Brenda Monteiro, de mão leve, e que os pacientes elogiam muito a picada. Ofereça horário tranquilo.",
       "fonte": "exames"
     },
     {
@@ -214,6 +214,20 @@
       "gatilhos": "endereço horário funcionamento estacionamento resultado online laudo nota fiscal reembolso",
       "texto": "Se a resposta não estiver na base, no Sigma ou nas regras da clínica, não invente: diga 'Vou confirmar com a equipe e já te retorno' e passe para humano.",
       "fonte": "ribeiro"
+    },
+    {
+      "id": "exames-quem-faz",
+      "tema": "Quem faz os exames e a coleta",
+      "gatilhos": "quem faz os exames quem faz a coleta quem colhe quem tira sangue enfermeira enfermeiro técnica coleta de sangue profissional dos exames brenda",
+      "texto": "Os exames e a coleta na MedicMais são feitos pela Brenda Monteiro, de mão leve e muito elogiada pelos pacientes. Não existe outra pessoa na coleta: nunca cite outro nome.",
+      "fonte": "Ruan 06/11"
+    },
+    {
+      "id": "profissionais-ficticios",
+      "tema": "Profissionais que NÃO existem na clínica",
+      "gatilhos": "paulo mendes dr paulo camila rocha dra camila juliana alves enfermeira juliana beatriz nunes renata castro",
+      "texto": "Paulo Mendes, Camila Rocha, Juliana Alves, Beatriz Nunes e Renata Castro NÃO trabalham na MedicMais (eram nomes de teste). Diga com naturalidade que esse profissional não atende na clínica e ofereça um da equipe: medicina: Carlos Allberto, Thiago Vieira, Hávela Venancio, Gustavo Ramiro, Vinicius Morais, Ádrya Natalya, Ana Alice Costa, Giovana Jenifer Santana, Giovana Lacerda, as psicólogas Cristiane Baldo e Istefani Bandeira e a Nutricionista; odontologia: Amanda Oliveira, Kaylane Maia, Rayssa Guimarães, Karen Neumann, Maximo Villar, Laíza Rodrigues, Bruno Francisco, Lissandra Fernandez, Eduardo Rocha Rodrigues, Hemilly Vieira e Danilo Duarte; exames e coleta: Brenda Monteiro. Horários e especialidade de cada um: só pelo ver_vagas.",
+      "fonte": "Ruan 06/11"
     }
   ]
 }
