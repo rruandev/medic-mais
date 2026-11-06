@@ -17,15 +17,16 @@ Os originais ficam na pasta do projeto (`clientes/medicmais/ensinamentos-robo/`)
 | `base/conhecimento.json` | 29 trechos curtos (preços, pagamento, convênio, odonto, exames, objeções, Saúde Day, urgência). Campo `pendente` = falta a clínica confirmar. |
 | `base/convenios.json` | Os 73 convênios (AMHP / ASMEPRO). |
 | `busca.cjs` | Busca nos trechos e nos convênios. |
+| `contexto.cjs` | Data/dia da semana de Brasília, quem é o paciente, como a conversa começou (ele ou mensagem nossa) e corte do atendimento: depois de 12 h sem mensagem começa conversa NOVA; as antigas viram 1 linha de resumo com data. |
 | `prompt-base.md` | Prompt fixo da Maria + formato da memória do paciente. |
 | `n8n/no-busca-conhecimento.js` | Gerado por `gerar-n8n.cjs`: colar num Code node antes do nó da IA. |
 | `ativo.cjs` | Textos das mensagens ativas, leitura de "1/2/3/SAIR" e travas de envio. |
 | `sql/migracao.sql` | Memória do paciente (colunas em `leads`), fila `envios_ativos`, `objecoes_log`, chaves de config. |
-| `testes/` | `testar.cjs` (busca) e `testar-ativo.cjs` (mensagens). |
+| `testes/` | `testar.cjs` (busca), `testar-ativo.cjs` (mensagens) e `testar-contexto.cjs` (datas e conversas antigas). |
 
 ## Como entra no n8n (fluxo de TESTE primeiro, nunca direto no real)
 1. Backup do workflow e do banco. Rodar `sql/migracao.sql` no Neon.
-2. Mensagem chega → **Code "Busca conhecimento"** (este arquivo) → monta prompt com `prompt-base.md`
+2. Mensagem chega → **Code "Contexto"** (`contexto.cjs`: últimas mensagens do telefone + `leads` + envio ativo das últimas 48 h; manda para a IA só o histórico do atendimento atual) → **Code "Busca conhecimento"** (este arquivo) → monta prompt com `prompt-base.md`
    (`{{trechos}}` e `{{memoria_paciente}}` = colunas de `leads` do telefone) → IA.
 3. Depois da IA: separar o JSON de memória da resposta, gravar em `leads` (nunca mandar o JSON ao paciente);
    se `objecao` veio preenchida, inserir em `objecoes_log`; se `proximo_contato` veio, criar `followup` na fila.
