@@ -231,35 +231,160 @@
      Mesma base que o robô usa (robo/base/*.json). Só leitura.
      ===================================================================== */
   function loadTreino() {
-    if (S.base) return Promise.resolve();
+    if (S.base) return loadAtivos();
     return api('GET', '/api/base').then((r) => { S.base = r; renderTreino(); });
   }
+  /* Mensagens automáticas (confirmação de consulta e follow-up): liga/desliga + o que saiu. */
+  const TIPO_ATIVO = { confirmacao: 'Confirmação de consulta', lembrete_dia: 'Lembrete do dia', falta: 'Faltou', followup: 'Follow-up', exames: 'Exames', retorno: 'Retorno', campanha: 'Campanha' };
+  const ST_ATIVO = { pendente: 'na fila', aprovado: 'aprovado', enviado: 'enviado', respondido: 'respondeu', cancelado: 'cancelado', erro: 'erro' };
+  function loadAtivos() {
+    return api('GET', '/api/ativos').then((r) => { S.ativos = r; renderAtivos(); }).catch(() => { const el = $('tr-ativos'); if (el) el.innerHTML = '<p class="tr-nota">Não consegui carregar agora. O painel tenta de novo sozinho.</p>'; });
+  }
+  function renderAtivos() {
+    const a = S.ativos, el = $('tr-ativos'); if (!a || !el) return;
+    const chave = (tipo, nome, desc) => `<div class="at-linha"><div><b>${nome}</b><small>${desc}</small></div><button type="button" class="btn ${a[tipo] ? 'btn-primary' : 'btn-ghost'}" data-ativo="${tipo}" aria-pressed="${a[tipo]}">${a[tipo] ? 'Ligado' : 'Desligado'}</button></div>`;
+    const quando = (x) => x ? new Date(x).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : '';
+    el.innerHTML = chave('confirmacao', 'Confirmação de consulta', 'Véspera da consulta (agenda do Sigma). Paciente responde 1, 2 ou 3.') +
+      chave('followup', 'Follow-up', 'Conversa parou sem agendar: chama em 24 h e, por último, em 72 h.') +
+      `<div class="at-linha"><div><b>Campanha</b><small>Só com o OK da agência a cada envio.</small></div><span class="tag">${a.campanha ? 'liberada' : 'sob aprovação'}</span></div>
+      <p class="tr-nota at-regra">Envios só de ${esc(a.janela.replace('-', ' às '))}, de segunda a sábado, até ${a.limite_dia} por dia. Hoje: ${a.enviados_hoje}. Quem responder SAIR não recebe mais.</p>
+      <h4 class="tr-g">Últimos envios</h4>` +
+      (a.envios.length ? `<ul class="at-lista">${a.envios.map((e) => `<li><div><b>${esc(e.nome || e.telefone)}</b> <span class="tag">${esc(TIPO_ATIVO[e.tipo] || e.tipo)}</span> <span class="tag">${esc(ST_ATIVO[e.status] || e.status)}</span><small>${quando(e.enviado_em || e.agendado_para)}</small></div><p>${esc(e.texto)}</p>${e.resposta ? `<p class="at-resp">Resposta: ${esc(e.resposta)}</p>` : ''}</li>`).join('')}</ul>` : '<p class="tr-vazio">Nenhum envio ainda.</p>');
+  }
+  document.addEventListener('click', async (e) => {
+    const b = e.target.closest && e.target.closest('[data-ativo]'); if (!b || !S.ativos) return;
+    const tipo = b.dataset.ativo, ativo = !S.ativos[tipo];
+    b.disabled = true;
+    try { S.ativos = await api('POST', '/api/ativos', { tipo, ativo }); renderAtivos(); toast(ativo ? 'Ligado.' : 'Desligado.'); }
+    catch (err) { toast(msgErro(err), 'err'); b.disabled = false; }
+  });
   const reais = (v) => v == null ? '—' : typeof v === 'number' ? 'R$ ' + v.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : esc(v);
   const GRUPOS_TREINO = [
     ['Como vender', (i) => /^(descoberta|fechamento|consultas-valor|exames-valor|exames-ciclo|odonto-pilares|empatia)$/.test(i.id)],
     ['Objeções', (i) => /^(objecao-|exames-medo)/.test(i.id)],
     ['Regras e avisos', (i) => /^(odonto-regra|odonto-parcelamento|convenios|cartao-de-todos|pagamento-formas|saude-day|retorno-gratuito|urgencia|nao-sei|preco-exames-laboratorio)$/.test(i.id)]
   ];
+  const edBtn = (k, rot) => `<button type="button" class="btn btn-ghost btn-sm" data-tr-ed="${k}">${icon('i-edit')}${rot || 'Editar'}</button>`;
   function renderTreino() {
     const b = S.base, el = $('v-treino');
     const precos = b.precos.grupos.map((g) => `<h4 class="tr-g">${esc(g.nome)}</h4><table class="tr-tab"><thead><tr><th>Serviço</th><th>Particular</th><th>Cartão de Todos / Interlife</th></tr></thead><tbody>${g.itens.map((it) => `<tr><td>${esc(it[0])}</td><td>${reais(it[1])}</td><td>${reais(it[2])}</td></tr>`).join('')}</tbody></table>`).join('');
     const regras = `<ul class="tr-regras">${b.precos.regras.map((r) => `<li>${esc(r)}</li>`).join('')}</ul>`;
-    const grupos = GRUPOS_TREINO.map(([nome, f]) => `<div class="card-box tr-box"><div class="cb-head"><h3>${esc(nome)}</h3></div><div class="tr-itens">${b.itens.filter(f).map((i) => `<details class="tr-item"><summary>${esc(i.tema)}${i.pendente ? ' <span class="tag">a confirmar</span>' : ''}</summary><p>${esc(i.texto)}</p>${i.pendente ? `<p class="tr-pend">${esc(i.pendente)}</p>` : ''}</details>`).join('')}</div></div>`).join('');
-    el.innerHTML = `<div class="vh"><div><h1 id="t-treino">Treinamento da Maria</h1><p>O que o robô sabe e como ele atende. Vem dos documentos da clínica (base de ${esc(b.versao)}).</p></div></div>
+    const usados = new Set();
+    const caixa = (nome, itens) => `<div class="card-box tr-box"><div class="cb-head"><h3>${esc(nome)}</h3><button type="button" class="btn btn-ghost btn-sm" data-tr-item="novo">${icon('i-plus')}Novo</button></div><div class="tr-itens">${itens.map((i) => `<details class="tr-item"><summary>${esc(i.tema)}${i.pendente ? ' <span class="tag">a confirmar</span>' : ''}</summary><p>${esc(i.texto)}</p>${i.pendente ? `<p class="tr-pend">${esc(i.pendente)}</p>` : ''}<button type="button" class="btn btn-ghost btn-sm tr-edit" data-tr-item="${esc(i.id)}">${icon('i-edit')}Editar</button></details>`).join('') || '<p class="tr-vazio">Nada aqui ainda.</p>'}</div></div>`;
+    const grupos = GRUPOS_TREINO.map(([nome, f]) => { const its = b.itens.filter((i) => !usados.has(i.id) && f(i)); its.forEach((i) => usados.add(i.id)); return [nome, its]; });
+    const outros = b.itens.filter((i) => !usados.has(i.id));
+    if (outros.length) grupos.push(['Outros assuntos', outros]);
+    const textos = b.textos_ativos ? Object.entries(b.textos_ativos.tipos).map(([k, t]) => `<details class="tr-item"><summary>${esc(t.nome)}</summary>${t.textos.map((x) => `<p class="tr-msg">${esc(x)}</p>`).join('')}</details>`).join('') : '';
+    el.innerHTML = `<div class="vh"><div><h1 id="t-treino">Treinamento da Maria</h1><p>O que o robô sabe e como ele atende. Tudo aqui é editável: o que você salvar vale já na próxima mensagem do paciente.${b.atualizado_em ? ' Última alteração: ' + esc(ago(b.atualizado_em)) + '.' : ''}</p></div></div>
       <div class="tr-grid">
-        <div class="card-box tr-box"><div class="cb-head"><h3>Tabela de preços</h3><span class="cb-sub">Sobradinho-DF</span></div><div class="tr-in">${precos}${regras}</div></div>
-        <div class="card-box tr-box"><div class="cb-head"><h3>Convênios</h3><span class="cb-sub">${b.convenios.length} planos · AMHP e ASMEPRO</span></div><div class="tr-in"><p class="tr-nota">${esc(b.regra_convenio)}</p>
+        <div class="card-box tr-box"><div class="cb-head"><h3>Mensagens automáticas</h3><span class="cb-sub">a Maria chama o paciente</span></div><div class="tr-in" id="tr-ativos"><div class="sk sk-row"></div></div>
+          ${textos ? `<div class="tr-itens"><div class="tr-sub"><h4 class="tr-g">Textos</h4>${edBtn('textos', 'Editar textos')}</div>${textos}</div>` : ''}</div>
+        <div class="card-box tr-box"><div class="cb-head"><h3>Tabela de preços</h3>${edBtn('precos')}</div><div class="tr-in">${precos}${regras}</div></div>
+        <div class="card-box tr-box"><div class="cb-head"><h3>Convênios</h3>${edBtn('convenios')}</div><div class="tr-in"><p class="tr-nota">${b.convenios.length} planos. ${esc(b.regra_convenio)}</p>
           <label class="search"><svg class="ic"><use href="#i-search"/></svg><input class="inp" id="tr-conv-busca" type="search" placeholder="Procurar plano (ex.: GEAP, Saúde Caixa)" aria-label="Procurar convênio"></label>
           <ul class="tr-conv" id="tr-conv"></ul></div></div>
-        ${grupos}
+        ${grupos.map(([n, its]) => caixa(n, its)).join('')}
       </div>`;
     const lista = () => {
       const t = semAc($('tr-conv-busca').value);
       const f = b.convenios.filter((c) => !t || semAc(c.nome).includes(t));
-      $('tr-conv').innerHTML = f.length ? f.map((c) => `<li><span>${esc(c.nome)}</span><small>${esc(c.rede)}</small></li>`).join('') : '<li class="tr-vazio">Não está na lista: a recepção confirma com o paciente.</li>';
+      $('tr-conv').innerHTML = f.length ? f.map((c) => `<li><span>${esc(c.nome)}</span><small>${esc(c.rede || '')}</small></li>`).join('') : '<li class="tr-vazio">Não está na lista: a recepção confirma com o paciente.</li>';
     };
     $('tr-conv-busca').addEventListener('input', lista); lista();
+    if (S.ativos) renderAtivos(); loadAtivos();
   }
+
+  /* ---------- edição do treinamento (salva no banco; o robô lê a mesma tabela) ---------- */
+  const acoes = (del) => `<div class="err-inline" role="alert" hidden></div><div class="modal-actions">${del ? '<button type="button" class="btn btn-ghost tr-del" data-tr-del="1">Excluir</button>' : ''}<button type="button" class="btn btn-ghost" data-close="1">Cancelar</button><button class="btn btn-primary" type="submit">Salvar</button></div>`;
+  async function salvaBase(form, chave, dados) {
+    const err = form.querySelector('.err-inline'), btn = form.querySelector('[type=submit]');
+    err.hidden = true; btn.disabled = true; btn.innerHTML = '<span class="spin"></span> Salvando...';
+    try { S.base = await api('PUT', '/api/base', { chave, dados }); closeModal(); renderTreino(); toast('Salvo. A Maria já usa a versão nova.'); }
+    catch (e) { btn.disabled = false; btn.textContent = 'Salvar'; if (e.status !== 401) { err.textContent = msgErro(e); err.hidden = false; } }
+  }
+  const slug = (t) => semAc(t).replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60) || 'item';
+  function editaItem(id) {
+    const it = id === 'novo' ? null : S.base.itens.find((i) => i.id === id);
+    openModal(it ? 'Editar assunto' : 'Novo assunto', `<form data-tr-form="item" novalidate>
+      <div class="field"><label for="ti-t">Assunto</label><input class="inp" id="ti-t" name="tema" maxlength="200" value="${esc(it ? it.tema : '')}" placeholder="Ex.: Objeção: vou pensar"></div>
+      <div class="field"><label for="ti-g">Palavras que o paciente usa</label><input class="inp" id="ti-g" name="gatilhos" maxlength="600" value="${esc(it ? it.gatilhos || '' : '')}" placeholder="Ex.: vou pensar depois te falo vou ver"><p class="hint">A Maria acha este assunto quando a mensagem tem essas palavras.</p></div>
+      <div class="field"><label for="ti-x">O que a Maria deve saber ou responder</label><textarea class="inp" id="ti-x" name="texto" rows="8" maxlength="4000">${esc(it ? it.texto : '')}</textarea></div>
+      <div class="field"><label for="ti-p">Falta confirmar algo? (opcional)</label><input class="inp" id="ti-p" name="pendente" maxlength="400" value="${esc(it ? it.pendente || '' : '')}" placeholder="Deixe vazio se está tudo certo"><p class="hint">Enquanto tiver texto aqui, a Maria não afirma esse ponto e chama a equipe.</p></div>
+      ${acoes(!!it)}</form>`, { wide: true });
+    const f = $('modal-body').querySelector('form');
+    f.onsubmit = (e) => {
+      e.preventDefault();
+      const v = { tema: f.tema.value.trim(), gatilhos: f.gatilhos.value.trim(), texto: f.texto.value.trim(), pendente: f.pendente.value.trim() };
+      const err = f.querySelector('.err-inline');
+      if (!v.tema || !v.texto) { err.textContent = 'Preencha o assunto e o que a Maria deve responder.'; err.hidden = false; return; }
+      const itens = S.base.itens.map((i) => ({ ...i }));
+      const novo = { ...(it || {}), ...v }; if (!novo.pendente) delete novo.pendente;
+      if (it) itens[itens.findIndex((i) => i.id === it.id)] = novo;
+      else { let base = slug(v.tema), sid = base, n = 2; while (itens.some((i) => i.id === sid)) sid = base + '-' + n++; novo.id = sid; novo.fonte = 'painel'; itens.push(novo); }
+      salvaBase(f, 'conhecimento', { itens });
+    };
+    const d = f.querySelector('[data-tr-del]');
+    if (d) d.onclick = () => { if (d.dataset.ok) return salvaBase(f, 'conhecimento', { itens: S.base.itens.filter((i) => i.id !== it.id) }); d.dataset.ok = '1'; d.textContent = 'Confirmar exclusão'; d.classList.add('btn-danger'); };
+  }
+  const numOuTexto = (v) => { v = String(v).trim(); if (!v || v === '—') return null; const n = Number(v.replace(/[R$\s.]/g, '').replace(',', '.')); return Number.isFinite(n) && /\d/.test(v) && !/[a-z]/i.test(v) ? n : v; };
+  const valorCampo = (v) => v == null ? '' : typeof v === 'number' ? v.toLocaleString('pt-BR') : v;
+  function linhaPreco(it) { return `<div class="tr-lin"><input class="inp" name="s" maxlength="160" value="${esc(it ? it[0] : '')}" placeholder="Serviço" aria-label="Serviço"><input class="inp" name="p" inputmode="decimal" value="${esc(it ? valorCampo(it[1]) : '')}" placeholder="Particular" aria-label="Particular"><input class="inp" name="c" inputmode="decimal" value="${esc(it ? valorCampo(it[2]) : '')}" placeholder="Cartão" aria-label="Cartão de Todos"><button type="button" class="icon-btn sm" data-tr-rm="1" aria-label="Remover linha">${icon('i-trash')}</button></div>`; }
+  function editaPrecos() {
+    const pr = S.base.precos;
+    openModal('Editar tabela de preços', `<form data-tr-form="precos" novalidate>
+      <p class="hint">Valores em reais. Deixe vazio quando não houver preço para aquela coluna.</p>
+      ${pr.grupos.map((g, gi) => `<fieldset class="tr-fs" data-g="${gi}"><input class="inp tr-gn" name="g" maxlength="120" value="${esc(g.nome)}" aria-label="Nome do grupo"><div class="tr-lin tr-cab"><span>Serviço</span><span>Particular</span><span>Cartão</span><span></span></div><div class="tr-lins">${g.itens.map(linhaPreco).join('')}</div><button type="button" class="btn btn-ghost btn-sm" data-tr-add="1">${icon('i-plus')}Adicionar linha</button></fieldset>`).join('')}
+      <div class="field"><label for="tp-r">Regras de pagamento (uma por linha)</label><textarea class="inp" id="tp-r" name="regras" rows="7">${esc(pr.regras.join('\n'))}</textarea></div>
+      ${acoes(false)}</form>`, { wide: true });
+    const f = $('modal-body').querySelector('form');
+    f.addEventListener('click', (e) => {
+      const rm = e.target.closest('[data-tr-rm]'); if (rm) { rm.parentElement.remove(); return; }
+      const ad = e.target.closest('[data-tr-add]'); if (ad) { ad.previousElementSibling.insertAdjacentHTML('beforeend', linhaPreco(null)); ad.previousElementSibling.lastElementChild.querySelector('input').focus(); }
+    });
+    f.onsubmit = (e) => {
+      e.preventDefault();
+      const grupos = [...f.querySelectorAll('.tr-fs')].map((fs) => ({ ...pr.grupos[+fs.dataset.g], nome: fs.querySelector('[name=g]').value.trim(),
+        itens: [...fs.querySelectorAll('.tr-lin')].map((l) => [l.querySelector('[name=s]').value.trim(), numOuTexto(l.querySelector('[name=p]').value), numOuTexto(l.querySelector('[name=c]').value)]).filter((it) => it[0]) }));
+      salvaBase(f, 'precos', { grupos, regras: f.regras.value.split('\n').map((x) => x.trim()).filter(Boolean) });
+    };
+  }
+  function editaConvenios() {
+    const b = S.base;
+    openModal('Editar convênios', `<form data-tr-form="convenios" novalidate>
+      <div class="field"><label for="tc-r">Regra geral</label><textarea class="inp" id="tc-r" name="regra" rows="3" maxlength="1000">${esc(b.regra_convenio || '')}</textarea></div>
+      <div class="field"><label for="tc-l">Planos aceitos (um por linha: nome | rede)</label><textarea class="inp" id="tc-l" name="lista" rows="14">${esc(b.convenios.map((c) => c.nome + (c.rede ? ' | ' + c.rede : '')).join('\n'))}</textarea><p class="hint">A Maria só confirma o plano que estiver nesta lista. Fora dela, ela chama a equipe.</p></div>
+      ${acoes(false)}</form>`, { wide: true });
+    const f = $('modal-body').querySelector('form');
+    f.onsubmit = (e) => {
+      e.preventDefault();
+      const antes = Object.fromEntries(b.convenios.map((c) => [semAc(c.nome), c]));
+      const convenios = f.lista.value.split('\n').map((l) => l.trim()).filter(Boolean).map((l) => { const [nome, rede] = l.split('|').map((x) => x.trim()); return { ...(antes[semAc(nome)] || {}), nome, rede: rede || '' }; });
+      salvaBase(f, 'convenios', { convenios, regra: f.regra.value.trim() });
+    };
+  }
+  function editaTextos() {
+    const t = S.base.textos_ativos;
+    openModal('Textos das mensagens automáticas', `<form data-tr-form="textos" novalidate>
+      <p class="hint">${esc(t.nota || '')} Para ter mais de uma versão, separe com uma linha só com ---.</p>
+      ${Object.entries(t.tipos).map(([k, x]) => `<div class="field"><label for="tt-${k}">${esc(x.nome)}</label><textarea class="inp" id="tt-${k}" name="${k}" rows="6" maxlength="4000">${esc(x.textos.join('\n---\n'))}</textarea></div>`).join('')}
+      ${acoes(false)}</form>`, { wide: true });
+    const f = $('modal-body').querySelector('form');
+    f.onsubmit = (e) => {
+      e.preventDefault();
+      const tipos = {};
+      for (const [k, x] of Object.entries(t.tipos)) {
+        const textos = f[k].value.split(/\n\s*---\s*\n/).map((s) => s.trim()).filter(Boolean);
+        if (!textos.length) { const err = f.querySelector('.err-inline'); err.textContent = `"${x.nome}" ficou sem texto.`; err.hidden = false; return; }
+        tipos[k] = { ...x, textos };
+      }
+      salvaBase(f, 'textos_ativos', { tipos });
+    };
+  }
+  $('v-treino').addEventListener('click', (e) => {
+    const it = e.target.closest('[data-tr-item]'); if (it) { e.preventDefault(); editaItem(it.dataset.trItem); return; }
+    const ed = e.target.closest('[data-tr-ed]'); if (!ed) return;
+    ({ precos: editaPrecos, convenios: editaConvenios, textos: editaTextos })[ed.dataset.trEd]();
+  });
   const semAc = (x) => String(x || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
 
   /* ---------- polling ---------- */
@@ -1587,6 +1712,7 @@
       if (p === '/api/contexto') return rotaContexto(method, q, body);
       if (p === '/api/humano') return { ultima_in: (() => { const m = db.msgs.filter((x) => x.direcao === 'in').sort((a, b) => b.id - a.id)[0]; return m ? { id: m.id, telefone: m.telefone } : null; })(), humano: db.leads.filter((l) => l.precisa_humano).map((l) => ({ id: l.id, telefone: l.telefone, nome: l.nome, motivo_humano: l.motivo_humano, etapa: l.etapa, atualizado_em: l.atualizado_em })) };
       if (p === '/api/profissionais') return { profissionais: PROFS };
+      if (p === '/api/ativos') { db.ativos = db.ativos || { confirmacao: false, followup: false, campanha: false, limite_dia: 80, janela: '08:00-19:00', enviados_hoje: 0, envios: [] }; if (method === 'POST') db.ativos[body.tipo] = !!body.ativo; return db.ativos; }
       if (p === '/api/robo') { if (method === 'POST') db.robo = !!body.ativo; return { ativo: db.robo !== false }; }
       if (p === '/api/agenda') { const i = q.get('inicio'), f = q.get('fim'); return { inicio: i, fim: f, profissionais: PROFS, agendamentos: db.ags.filter((a) => a.data >= i && a.data <= f).sort((a, b) => (a.data + a.hora).localeCompare(b.data + b.hora)).map(snap), servicos: SVS.map((s) => Object.assign({}, s)) }; }
       if (p === '/api/leads' && method === 'GET') return { leads: db.leads.slice().sort((a, b) => (b.precisa_humano - a.precisa_humano) || (new Date(b.atualizado_em) - new Date(a.atualizado_em))) };
@@ -1659,7 +1785,7 @@
     return {
       midia: (arq) => new Promise((res, rej) => setTimeout(() => { if (/offline/i.test(arq)) rej(new Error('offline')); else midiaDemo(arq).then(res, rej); }, 250)),
       handle(method, path, body) {
-        if (path === '/api/base') return Promise.all(['conhecimento', 'convenios', 'precos'].map((f) => fetch('/robo/base/' + f + '.json').then((x) => x.json()))).then(([k, c, pr]) => ({ versao: k.versao, itens: k.itens, convenios: c.convenios, regra_convenio: c.regra, precos: pr }));
+        if (path === '/api/base') { if (method === 'PUT') return Promise.reject(new ApiError(400, 'Na demonstração nada é salvo.')); return Promise.all(['conhecimento', 'convenios', 'precos', 'textos-ativos'].map((f) => fetch('/robo/base/' + f + '.json').then((x) => x.json()))).then(([k, c, pr, ta]) => ({ versao: k.versao, itens: k.itens, convenios: c.convenios, regra_convenio: c.regra, precos: pr, textos_ativos: ta })); }
         if (!db) { db = seed(); setTimeout(() => { const l = db.leads.find((x) => x.nome === 'Helena Simulada'); if (l) { l.precisa_humano = true; l.atualizado_em = iso(0); } }, 25000); /* demonstra o alerta de humano */ }
         return new Promise((res, rej) => setTimeout(() => { try { res(JSON.parse(JSON.stringify(route(method, path, body || {})))); } catch (e) { rej(e); } }, 140));
       }

@@ -669,3 +669,22 @@ textarea.inpp{padding:11px 13px;min-height:84px;resize:vertical}
 .tr-item summary{cursor:pointer;font-weight:700;font-size:14.5px}
 .tr-item p{font-size:14px;line-height:1.5;color:var(--text-2);margin-top:6px}
 .tr-pend{color:var(--gray)!important;font-size:13px!important}
+.at-linha{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
+.at-linha b{display:block;font-size:14.5px}.at-linha small{display:block;color:var(--gray);font-size:13px;margin-top:2px}
+.at-linha .btn{flex:none;min-width:104px}
+.at-regra{margin-top:12px}
+.at-lista{list-style:none;margin:0;padding:0;max-height:360px;overflow:auto}
+.at-lista li{padding:9px 0;border-bottom:1px solid var(--line);font-size:14px}
+.at-lista small{color:var(--gray);margin-left:6px}
+.at-lista p{color:var(--text-2);margin-top:4px;white-space:pre-line;line-height:1.45}
+.at-resp{color:var(--text)!important;font-weight:600}
+.tr-edit{margin-top:8px}
+.tr-sub{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:6px}
+.tr-sub .tr-g{margin:0}
+.tr-msg{white-space:pre-line;background:var(--soft);border-radius:10px;padding:8px 10px}
+.tr-fs{border:1px solid var(--line);border-radius:12px;padding:10px;margin:0 0 14px}
+.tr-gn{font-weight:700;margin-bottom:8px}
+.tr-lin{display:grid;grid-template-columns:minmax(0,1fr) 84px 84px 36px;gap:6px;margin-bottom:6px;align-items:center}
+.tr-lin .inp{min-height:40px;padding:0 9px;font-size:15px}
+.tr-del{margin-right:auto}
+.tr-cab{font-size:11.5px;font-weight:700;color:var(--gray);margin-bottom:2px}
