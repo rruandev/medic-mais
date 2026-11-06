@@ -1,0 +1,120 @@
+// GERADO por robo/gerar-n8n.cjs em 2026-11-06 (base 2026-11-06). Não editar à mão.
+// Entrada: $json.texto (mensagem do paciente). Saída: trechos (texto para o prompt), ids, convenios_achados.
+// Busca na base de conhecimento do robô MedicMais (sem dependências, roda no Code node do n8n).
+// Ideia: em vez de mandar a apostila inteira para a IA a cada mensagem, mandamos só os 3-4 trechos
+// mais parecidos com o que o paciente escreveu (BM25 com sinônimos). Custo zero, resposta em < 5 ms.
+
+const PARADAS = new Set(('a o e é de da do das dos em no na nos nas um uma uns umas para pra pro por com sem que se ' +
+  'eu me meu minha voce você vc ele ela isso esse essa este esta aqui ai aí la lá ja já tem ter tô to ta tá ' +
+  'mais muito bem oi ola olá bom boa dia tarde noite tudo obrigado obrigada sim nao não queria quero gostaria saber ' +
+  'qual quais como onde quando qual vocês voces ou ao aos as os sua seu mim lhe nos nós foi ser sou está esta estou').split(/\s+/));
+
+// Palavras do paciente → termos da base. Ampliar aqui quando aparecer jeito novo de perguntar.
+const SINONIMOS = {
+  quanto: 'preco valor', custa: 'preco valor', valor: 'preco', preco: 'valor', caro: 'caro preco', barato: 'preco caro',
+  dentista: 'odonto dente', dente: 'odonto dentista', dentes: 'odonto dentista', odontologico: 'odonto dentista',
+  implante: 'odonto implante', aparelho: 'odonto', canal: 'odonto', clareamento: 'odonto', limpeza: 'odonto',
+  plano: 'convenio', convenio: 'plano', convenios: 'convenio',
+  ultrassom: 'ecografia', ultrasom: 'ecografia', usg: 'ecografia', eco: 'ecografia',
+  hemograma: 'exame sangue laboratorio', sangue: 'exame laboratorio', laboratorio: 'exame', checkup: 'check-up exame',
+  gineco: 'ginecologia', ginecologista: 'ginecologia', endocrino: 'endocrinologia', endocrinologista: 'endocrinologia',
+  pediatra: 'pediatria', psicologo: 'psicologia', psicologa: 'psicologia', psiquiatra: 'psiquiatria', geriatra: 'geriatria',
+  clinico: 'clinico consulta medico', medico: 'consulta', medica: 'consulta', consulta: 'medico',
+  parcelar: 'parcela', parcelado: 'parcela', vezes: 'parcela', cartao: 'cartao parcela', pix: 'pagamento vista',
+  gratis: 'gratuito gratuita', graca: 'gratuito gratuita', gratuito: 'gratis',
+  marcar: 'agendar horario', agendar: 'marcar horario', horario: 'agendar', vaga: 'horario agendar',
+  longe: 'distancia', distante: 'distancia', ocupado: 'ocupado tempo', correria: 'ocupado',
+  pensar: 'pensar depois', depois: 'pensar', medo: 'medo', pavor: 'medo', agulha: 'agulha picada coleta',
+  orcar: 'cotar orcamento', orcamento: 'cotar', pesquisar: 'cotar', cotar: 'orcamento',
+};
+
+function normalizar(t) {
+  return String(t || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9\s-]/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
+// "Raiz" simples em português: tira plural e algumas terminações comuns.
+function raiz(p) {
+  if (p.length <= 3) return p;
+  return p.replace(/(coes|soes)$/, 'c').replace(/(cao|sao)$/, 'c').replace(/(mente)$/, '')
+    .replace(/(istas|ista)$/, 'ist').replace(/(ias|ia)$/, 'i').replace(/(os|as|es)$/, '').replace(/s$/, '')
+    .replace(/[aeo]$/, '');
+}
+
+function termos(texto, expandir) {
+  const out = [];
+  for (const p of normalizar(texto).split(' ')) {
+    if (!p || PARADAS.has(p)) continue;
+    out.push(raiz(p));
+    if (expandir && SINONIMOS[p]) for (const s of SINONIMOS[p].split(' ')) out.push(raiz(normalizar(s)));
+  }
+  return out;
+}
+
+function criarIndice(itens) {
+  const docs = itens.map((it) => {
+    // gatilhos e tema pesam mais que o texto (repetidos)
+    const ts = [...termos(it.tema, false), ...termos(it.tema, false), ...termos(it.gatilhos, false),
+      ...termos(it.gatilhos, false), ...termos(it.texto, false)];
+    const tf = new Map();
+    for (const t of ts) tf.set(t, (tf.get(t) || 0) + 1);
+    return { it, tf, len: ts.length };
+  });
+  const df = new Map();
+  for (const d of docs) for (const t of d.tf.keys()) df.set(t, (df.get(t) || 0) + 1);
+  const media = docs.reduce((s, d) => s + d.len, 0) / docs.length;
+  return { docs, df, media, N: docs.length };
+}
+
+function buscar(indice, pergunta, k = 3, minimo = 1.2) {
+  const q = [...new Set(termos(pergunta, true))];
+  const K1 = 1.2, B = 0.6;
+  const res = indice.docs.map((d) => {
+    let s = 0;
+    for (const t of q) {
+      const f = d.tf.get(t);
+      if (!f) continue;
+      const n = indice.df.get(t);
+      const idf = Math.log(1 + (indice.N - n + 0.5) / (n + 0.5));
+      s += idf * (f * (K1 + 1)) / (f + K1 * (1 - B + B * d.len / indice.media));
+    }
+    return { id: d.it.id, score: Math.round(s * 100) / 100, item: d.it };
+  }).filter((r) => r.score >= minimo).sort((a, b) => b.score - a.score);
+  return res.slice(0, k);
+}
+
+// Convênios: apelidos que o paciente usa → nome na lista.
+const APELIDOS_CONVENIO = {
+  'gdf': 'GDF SAÚDE', 'inas': 'GDF SAÚDE', 'brb': 'BRB', 'regius': 'BRB', 'caixa': 'SAÚDE CAIXA', 'correios': 'POSTAL SAÚDE',
+  'postal': 'POSTAL SAÚDE', 'policia federal': 'PF SAÚDE', 'pf': 'PF SAÚDE', 'pm': 'PMDF', 'policia militar': 'PMDF',
+  'bombeiro': 'CBMDF', 'bombeiros': 'CBMDF', 'exercito': 'FUSEX', 'senado': 'SIS SENADO', 'camara': 'CÂMARA DOS DEPUTADOS',
+  'tjdft': 'PRÓ-SAÚDE (TJDFT)', 'stf': 'STF-MED', 'stj': 'PRÓ-SER (STJ)', 'banco central': 'BACEN', 'embrapa': 'CASEMBRAPA',
+  'allianz': 'AGF - ALLIANZ', 'evida': 'LUMINAR SAÚDE', 'luminar': 'LUMINAR SAÚDE', 'bndes': 'FAPES', 'petrobras': 'SAÚDE PETROBRAS',
+  'mpu': 'PLAN ASSISTE', 'stm': 'PLAS/JMU', 'codevasf': 'CASEC', 'telos': 'EMBRATEL', 'embratel': 'EMBRATEL',
+};
+const GENERICAS = new Set(['saude', 'plano', 'convenio', 'de', 'do', 'da', 'dos', 'demais', 'planos', 'tribunal', 'regional', 'federal', 'consultas', 'medicas']);
+
+function acharConvenio(lista, texto) {
+  const n = ' ' + normalizar(texto) + ' ';
+  const achados = new Map();
+  for (const [ap, alvo] of Object.entries(APELIDOS_CONVENIO)) {
+    if (n.includes(' ' + ap + ' ')) for (const c of lista) if (normalizar(c.nome).includes(normalizar(alvo))) achados.set(c.nome, c);
+  }
+  for (const c of lista) {
+    const palavras = normalizar(c.nome).split(' ').filter((p) => p.length >= 3 && !GENERICAS.has(p));
+    if (palavras.length && palavras.some((p) => n.includes(' ' + p + ' '))) achados.set(c.nome, c);
+  }
+  return [...achados.values()];
+}
+
+
+const ITENS = [{"id":"preco-consultas","tema":"Preço das consultas médicas","gatilhos":"quanto custa consulta valor preço médico clínico geral endocrinologista endócrino ginecologista gineco psicólogo psicologia psiquiatra psiquiatria pediatra pediatria geriatra geriatria ASO admissional quanto fica","texto":"Valores (Particular / Cartão de Todos e Interlife): Clínico geral R$150 / R$80. Endocrinologia R$250 / R$100. Ginecologia R$200 / R$95. Psicologia R$150 / R$75. Psiquiatria R$250 (sem valor parceiro). Pediatria R$250 / R$120. Geriatria R$250 / R$120. ASO R$70 / R$70. Antes do preço, diga em 1 frase o valor da consulta (médicos experientes, consulta sem pressa). Pergunte se a pessoa tem convênio ou Cartão de Todos/Interlife antes de passar o valor particular."},{"id":"preco-ecografias","tema":"Preço de ultrassom / ecografia","gatilhos":"ultrassom ultrassonografia ecografia eco doppler transvaginal abdomen abdominal mama tireoide obstétrico morfológico quanto custa valor","texto":"Ecografias (todas): Particular R$120 / Cartão de Todos e Interlife R$100. Ecografias com Doppler: Particular R$240 / Parceiros R$200. Se o paciente não souber se é com Doppler, peça uma foto do pedido médico."},{"id":"preco-preventivo","tema":"Preço do preventivo e HPV","gatilhos":"preventivo papanicolau citologia HPV líquido exame ginecológico quanto custa valor","texto":"Preventivo: Particular R$70 / Cartão de Todos e Interlife R$40. Preventivo líquido (HPV): Particular R$240 (sem valor parceiro)."},{"id":"preco-exames-laboratorio","tema":"Preço de exames de sangue / laboratório","gatilhos":"exame de sangue hemograma glicemia colesterol tsh vitamina laboratório check-up checkup orçamento exames pedido médico quanto custa valor","texto":"Preço de exame de laboratório vem SÓ do Sigma (ferramenta de preços). Se o Sigma não trouxer o valor, diga que vai confirmar com a equipe e passe para humano. Peça a foto do pedido médico para orçar tudo junto. Nunca fale o total parcelado: fale a parcela (ex.: '4x de R$100', nunca 'R$400 em 4x'). Antes do preço, agregue valor: análise feita pela DASA e coleta com enfermeira de mão leve."},{"id":"pagamento-formas","tema":"Formas de pagamento, parcelamento e desconto","gatilhos":"parcela parcelar parcelado vezes cartão crédito débito pix dinheiro à vista desconto boleto forma de pagamento aceita","texto":"Pergunte com leveza: 'Você prefere pagar em parcelinhas ou à vista com um super desconto?'. Cartão: até 12x, parcela mínima de R$100; fale sempre o valor da parcela, nunca o total. Exames à vista: 20% de desconto. Consultas particulares: 10% no Pix ou dinheiro e 7% no cartão. Não invente outro desconto nem combine condição fora disso."},{"id":"cartao-de-todos","tema":"Cartão de Todos e Interlife","gatilhos":"cartão de todos interlife cartão desconto parceiro beneficiário tenho cartão","texto":"Beneficiários do Cartão de Todos e da Interlife pagam o valor diferenciado da tabela (ex.: clínico R$80, ginecologia R$95, pediatria R$120). Psiquiatria e Preventivo líquido (HPV) não têm valor parceiro. Peça para levar o cartão no dia."},{"id":"convenios","tema":"Convênios aceitos","gatilhos":"convênio plano de saúde aceita atende pelo plano amhp asmepro geap gdf saúde inas brb saúde caixa porto seguro care plus omint notre dame pmdf cbmdf fusex postal petrobras unafisco serpro conab","texto":"Todos os médicos atendem convênio pelas redes AMHP e ASMEPRO (73 planos). O sistema confere o nome do plano na lista e avisa nos trechos se achou. Se o plano estiver na lista: diga que atende e já ofereça horário. Se não estiver ou houver dúvida (coparticipação, carência, autorização): diga que vai confirmar com a equipe e passe para humano. Nunca afirme cobertura de exame ou procedimento sem confirmação."},{"id":"odonto-regra","tema":"Dentista: consulta odontológica gratuita","gatilhos":"dentista odonto odontologia dente dentes implante protocolo prótese aparelho ortodontia canal clareamento limpeza extração siso restauração lente faceta coroa sorriso gengiva quanto custa","texto":"Odontologia: NUNCA passe preço. Ofereça sempre a 'consulta odontológica gratuita' (nunca use a palavra 'avaliação') e frise que é sem custo. O valor do tratamento é apresentado na consulta, item por item, depois do dentista examinar. Antes, faça 1 pergunta de descoberta (o que te incomoda?)."},{"id":"odonto-pilares","tema":"Por que fazer o tratamento odontológico na MedicMais","gatilhos":"por que medicmais diferencial qualidade dentista bom confiável especialista material ambiente seguro cirurgia implante","texto":"3 pilares: 1) Dentistas especialistas: cada um cuida da sua área, ninguém 'faz tudo' ('se fosse no coração, você iria num cardiologista ou num clínico geral?'). 2) Profissional + material de alto padrão, inclusive importado: é o que fica na boca do paciente. 3) Ambiente médico-hospitalar: médico, exames e odontologia no mesmo lugar, mais seguro em procedimentos cirúrgicos."},{"id":"odonto-parcelamento","tema":"Condições para tratamento odontológico","gatilhos":"implante caro não tenho dinheiro parcelar tratamento dentário boleto entrada juros condição","texto":"Não deixe a pessoa desistir por dinheiro antes de conhecer as condições: diga que a MedicMais sempre busca uma condição que caiba no bolso e que o dentista apresenta as opções na consulta odontológica gratuita. Não cite número de parcelas de tratamento odontológico até a equipe confirmar a condição vigente."},{"id":"exames-valor","tema":"Por que fazer os exames na MedicMais","gatilhos":"por que fazer exame aqui laboratório confiável qualidade dasa resultado coleta onde fazer exames","texto":"Agregue valor antes do preço: as amostras são analisadas pela DASA, o mesmo grupo que analisa os exames de grandes laboratórios. A coleta é feita por enfermeira de mão leve, muito elogiada pelos pacientes. O preço é muito competitivo. Objetivo: fechar já e deixar o retorno com o médico agendado."},{"id":"exames-medo-agulha","tema":"Medo de agulha / coleta","gatilhos":"medo de agulha dói picada coleta tenho pavor desmaio sangue nervoso","texto":"Acolha (é muito comum ter medo de agulha). Diga que a coleta é feita por enfermeira de mão leve e que os pacientes elogiam muito a picada. Ofereça horário tranquilo."},{"id":"exames-ciclo","tema":"Importância de fazer os exames pedidos e voltar","gatilhos":"depois eu faço não sei se preciso exame pedido do médico retorno resultado mostrar ao médico vou deixar pra depois","texto":"Explique o ciclo: consulta → exames → retorno. Sem os exames o médico dificilmente fecha o diagnóstico, e a consulta perde o sentido. Pergunte: 'Quando foi a última vez que você fez um check-up?'. Ofereça já deixar coleta e retorno agendados."},{"id":"consultas-valor","tema":"Por que consultar na MedicMais","gatilhos":"médico bom por que aí consulta rápida atendimento diferencial médicos experientes confiável","texto":"Não venda só 'temos médico': venda cuidado. Os médicos são experientes, atendem na MedicMais há bastante tempo, gostam do que fazem, fazem consulta minuciosa e escutam o paciente. Nada de atendimento 'fast-food'."},{"id":"descoberta","tema":"Perguntas para entender o paciente","gatilhos":"quero marcar informação dúvida estou com dor queria saber primeira vez","texto":"Antes de preço, entenda a pessoa com UMA pergunta por mensagem: 1) O que te trouxe? Alguma dor ou algo que incomoda? 2) Isso te afeta no dia a dia (sorrir, comer, dormir, trabalhar)? 3) Há quanto tempo? 4) Já procurou outra clínica? Guarde as respostas na memória do paciente: elas são usadas depois para quebrar objeções."},{"id":"fechamento","tema":"Como conduzir para o agendamento","gatilhos":"quero marcar agendar horário disponível vaga quando tem amanhã hoje semana","texto":"Conduza, não pergunte 'quer marcar?'. Use escolha: 'Prefere de manhã ou à tarde?' / 'Tenho quinta 9h ou sexta 14h, qual fica melhor?'. Confirme os dados (nome completo, CPF, especialidade, data e hora) e só marque depois do 'sim' do paciente."},{"id":"objecao-preco","tema":"Objeção: está caro / não tenho dinheiro","gatilhos":"caro muito caro não tenho dinheiro sem grana apertado não posso pagar mais barato tá puxado","texto":"Não discuta preço. 1) Acolha. 2) Lembre o que ELE disse da dor e do tempo. 3) Reforce o valor (especialistas, qualidade, cuidado). 4) Mostre a condição: parcela (até 12x, mínimo R$100), 20% à vista em exames, valor Cartão de Todos se tiver, convênio se tiver. Odonto: consulta gratuita para conhecer as condições. Feche com escolha de horário."},{"id":"objecao-concorrencia","tema":"Objeção: vou orçar em outro lugar / outro é mais barato","gatilhos":"vou cotar orçar em outro lugar pesquisar preço outro laboratório outra clínica mais barato concorrente sabin exame amor saúde vi mais barato","texto":"Diga com segurança que o preço da MedicMais é muito competitivo e costuma ganhar orçamentos de outros lugares, com análise DASA e coleta de mão leve. Pergunte o que pesa mais para ele (preço, horário, confiança) e ofereça a melhor condição permitida (parcela ou 20% à vista em exames). Não fale mal de outra clínica nem cite nomes."},{"id":"objecao-vou-pensar","tema":"Objeção: vou pensar / depois eu vejo","gatilhos":"vou pensar depois vejo vou ver deixa eu ver te falo depois vou falar com marido esposa família","texto":"Respeite, mas descubra a dúvida real: 'Claro! Ficou alguma dúvida sobre valor, horário ou o tratamento em si?'. Responda essa dúvida. Se ainda quiser pensar, pergunte quando pode chamar de novo e registre o follow-up com data."},{"id":"objecao-tempo","tema":"Objeção: não é urgente / deixo para depois","gatilhos":"não é urgente não tenho tempo agora mais pra frente ano que vem esperar adiar","texto":"Pergunte há quanto tempo ele convive com isso e como tem afetado o dia a dia. Mostre que problema de saúde e de dente tende a virar bola de neve: quanto antes, mais simples. Ofereça um horário próximo."},{"id":"objecao-ocupado","tema":"Objeção: estou ocupado / trabalho","gatilhos":"ocupado trabalho correria sem tempo agora não posso horário difícil depois do trabalho sábado","texto":"Não discuta, facilite: 'Qual horário costuma ser mais tranquilo pra você?'. Ofereça o horário mais próximo disso. Se não puder falar agora, pergunte quando pode chamar e registre o follow-up com data e hora. Cliente ocupado não é cliente perdido."},{"id":"objecao-distancia","tema":"Objeção: é longe","gatilhos":"longe distância moro longe não sou de sobradinho transporte ônibus difícil chegar","texto":"Não aceite a distância como barreira final: pergunte a rotina e tente encaixar a ida à clínica num dia em que a pessoa já passa pela região, juntando tudo numa só visita (consulta + exames)."},{"id":"objecao-medo","tema":"Objeção: medo (dentista, procedimento, cirurgia)","gatilhos":"medo tenho medo de dentista pavor dor anestesia cirurgia nervoso trauma","texto":"Acolha sem pressa. O medo diminui quando a confiança aumenta: ambiente médico-hospitalar, profissional especialista e material de qualidade. Convide para a consulta odontológica gratuita só para conversar e conhecer, sem compromisso."},{"id":"objecao-convenio-nao-aceito","tema":"Objeção: não tenho convênio / plano não aceito","gatilhos":"não tenho convênio não tenho plano meu plano não está particular sem plano","texto":"Mostre as opções: valor de Cartão de Todos/Interlife (se tiver), particular com 10% no Pix/dinheiro ou parcelado em até 12x (mínimo R$100 por parcela). Odonto: consulta gratuita."},{"id":"saude-day","tema":"Saúde Day (atendimento gratuito)","gatilhos":"saúde day consulta gratuita de graça grátis evento mutirão atendimento gratuito sábado","texto":"O Saúde Day é o dia em que a MedicMais abre as portas para atendimento gratuito à população de Sobradinho: consulta médica gratuita e consulta odontológica gratuita. Exames pedidos no dia têm 50% de desconto (só no Saúde Day). Data, vagas e regras: só a equipe confirma; nunca invente data, passe para humano ou use o aviso cadastrado."},{"id":"retorno-gratuito","tema":"Retorno gratuito no 2º sábado","gatilhos":"retorno mostrar exame resultado pagar de novo nova consulta segundo sábado","texto":"Todo segundo sábado do mês a MedicMais abre para atendimento gratuito: o paciente pode voltar para mostrar os resultados dos exames sem pagar nova consulta."},{"id":"empatia","tema":"Paciente com dor, preocupado ou com criança","gatilhos":"estou com dor muita dor preocupada meu filho minha filha criança bebê mãe doente triste vergonha","texto":"Nosso público é sensível: quem procura clínica geralmente está passando por algo. Seja acolhedor, sem pressa, elogie quando couber. Trate com carinho os filhos do paciente. Avise se houver espera."},{"id":"urgencia","tema":"Sinais de urgência","gatilhos":"falta de ar dor no peito desmaiou sangramento forte convulsão infarto avc emergência urgente grave","texto":"Se houver sinal de emergência (dor no peito, falta de ar forte, desmaio, sangramento intenso, convulsão), oriente na hora a ligar 192 (SAMU) ou ir ao pronto-socorro mais próximo, e chame a equipe. Não marque consulta como resposta a uma emergência."},{"id":"nao-sei","tema":"Quando não há informação","gatilhos":"endereço horário funcionamento estacionamento resultado online laudo nota fiscal reembolso","texto":"Se a resposta não estiver na base, no Sigma ou nas regras da clínica, não invente: diga 'Vou confirmar com a equipe e já te retorno' e passe para humano."}];
+const CONVENIOS = [{"nome":"AFEB BRASAL","rede":"AMHP"},{"nome":"AFFEGO","rede":"AMHP"},{"nome":"AGF - ALLIANZ SAÚDE","rede":"ASMEPRO"},{"nome":"ANAFE SAÚDE","rede":"AMHP"},{"nome":"BACEN","rede":"AMHP"},{"nome":"BACEN - BANCO CENTRAL","rede":"ASMEPRO"},{"nome":"BRB (SAÚDE BRB)","rede":"AMHP"},{"nome":"BRB SAÚDE - REGIUS","rede":"ASMEPRO"},{"nome":"CAEME - GO","rede":"AMHP"},{"nome":"CAESAN","rede":"AMHP"},{"nome":"CAMED","rede":"AMHP"},{"nome":"CARE PLUS","rede":"AMHP"},{"nome":"CASEC (CODEVASF)","rede":"AMHP"},{"nome":"CASEMBRAPA (EMBRAPA)","rede":"AMHP"},{"nome":"CBMDF","rede":"AMHP"},{"nome":"CLIQUE MÉDICOS","rede":"AMHP"},{"nome":"CNTI","rede":"AMHP"},{"nome":"CODEVASF- CASEC","rede":"ASMEPRO"},{"nome":"CONAB","rede":"AMHP e ASMEPRO"},{"nome":"CÂMARA DOS DEPUTADOS","rede":"ASMEPRO"},{"nome":"EMBRATEL (TELOS)","rede":"AMHP"},{"nome":"EVIDA - LUMINAR SAÚDE","rede":"ASMEPRO"},{"nome":"FAPES (BNDES)","rede":"AMHP"},{"nome":"FASCAL","rede":"AMHP e ASMEPRO"},{"nome":"FUSEX","rede":"ASMEPRO"},{"nome":"GAMA SAÚDE","rede":"ASMEPRO"},{"nome":"GDF SAÚDE","rede":"AMHP"},{"nome":"GDF SAÚDE - INAS","rede":"ASMEPRO"},{"nome":"GEAP","rede":"AMHP"},{"nome":"GRAVIA","rede":"AMHP"},{"nome":"LIFE EMPRESARIAL","rede":"AMHP"},{"nome":"LUMINAR SAÚDE (EVIDA)","rede":"AMHP"},{"nome":"NOTRE DAME","rede":"AMHP"},{"nome":"NOVA SAÚDE","rede":"ASMEPRO"},{"nome":"OMINT SAÚDE","rede":"AMHP"},{"nome":"PETROBRÁS PETRÓLEO BRASILEIRO","rede":"ASMEPRO"},{"nome":"PF SAÚDE (POLÍCIA FEDERAL)","rede":"AMHP"},{"nome":"PF SAÚDE - POLICIA FEDERAL","rede":"ASMEPRO"},{"nome":"PLAN ASSISTE (MPU)","rede":"AMHP"},{"nome":"PLAN-ASSISTE - MPU","rede":"ASMEPRO"},{"nome":"PLAS/JMU (STM)","rede":"AMHP"},{"nome":"PMDF - CONSULTAS MÉDICAS","rede":"AMHP"},{"nome":"PMDF - SAÚDE MENTAL E TERAPIAS","rede":"AMHP"},{"nome":"PORTO SEGURO","rede":"ASMEPRO"},{"nome":"POSTAL SAÚDE - CORREIOS","rede":"ASMEPRO"},{"nome":"PROASA","rede":"AMHP e ASMEPRO"},{"nome":"PRÓ-SAÚDE (CÂMARA DOS DEPUTADOS)","rede":"AMHP"},{"nome":"PRÓ-SAÚDE (TJDFT)","rede":"AMHP"},{"nome":"PRÓ-SER (STJ)","rede":"AMHP"},{"nome":"PRÓ-SOCIAL (TRF)","rede":"AMHP"},{"nome":"REAL GRANDEZA (DEMAIS PLANOS)","rede":"AMHP"},{"nome":"REAL GRANDEZA (SALVUS E SALUTEM)","rede":"AMHP"},{"nome":"SAÚDE CAIXA","rede":"AMHP e ASMEPRO"},{"nome":"SAÚDE PETROBRAS","rede":"AMHP"},{"nome":"SERPRO","rede":"AMHP"},{"nome":"SIS SENADO","rede":"AMHP"},{"nome":"SIS SENADO FEDERAL","rede":"ASMEPRO"},{"nome":"STF - MED","rede":"ASMEPRO"},{"nome":"STF-MED (STF)","rede":"AMHP"},{"nome":"STJ - PRÓ SER","rede":"ASMEPRO"},{"nome":"STM - PLAS-JMU","rede":"ASMEPRO"},{"nome":"T.J.D.F.T - PRÓ SAÚDE","rede":"ASMEPRO"},{"nome":"T.R.E - TRIBUNAL REGIONAL ELEITORAL","rede":"ASMEPRO"},{"nome":"TRE SAÚDE","rede":"AMHP"},{"nome":"TRF - TRIBUNAL REGIONAL FEDERAL","rede":"ASMEPRO"},{"nome":"TRT - TRIBUNAL REGIONAL DO TRABALHO","rede":"ASMEPRO"},{"nome":"TRT SAÚDE","rede":"AMHP"},{"nome":"TST - TRIBUNAL SUPERIOR DO TRABALHO","rede":"ASMEPRO"},{"nome":"TST SAÚDE","rede":"AMHP"},{"nome":"UNAFISCO SAÚDE (DEMAIS PLANOS)","rede":"AMHP"},{"nome":"UNAFISCO SAÚDE (PREMIUM)","rede":"AMHP"},{"nome":"UNAFISCO SAÚDE (SINDIFISCO)","rede":"ASMEPRO"},{"nome":"UNIVIDA - PROCESSO","rede":"ASMEPRO"}];
+const INDICE = criarIndice(ITENS);
+const msg = String($json.texto || '');
+const achados = buscar(INDICE, msg, 3);
+const conv = acharConvenio(CONVENIOS, msg);
+let trechos = achados.map((r) => '- ' + r.item.tema + ': ' + r.item.texto).join('\n');
+if (conv.length) trechos += '\n- Convênio citado: ' + conv.map((c) => c.nome + ' (' + c.rede + ')').join(', ') + ' — ESTÁ na lista de convênios aceitos.';
+else if (/conv[eê]nio|plano/i.test(msg)) trechos += '\n- O plano citado NÃO foi achado na lista. Não confirme: diga que vai checar com a equipe.';
+return { json: { ...$json, trechos: trechos || '(nenhum trecho: se não souber, chame a equipe)', trechos_ids: achados.map((r) => r.id), convenios_achados: conv.map((c) => c.nome) } };

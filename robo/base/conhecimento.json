@@ -1,0 +1,219 @@
+{
+  "versao": "2026-11-06",
+  "fontes": {
+    "apostila": "APOSTILA DE TREINAMENTO GERAL.docx (time MedicMais)",
+    "fechamento": "SCRIPT O FECHAMENTO.docx (João Pedro dos Santos Lima)",
+    "exames": "Como Vender Mais Exames.docx (João Pedro dos Santos Lima)",
+    "tabela": "tabela_precos_medicmais.pdf (Sobradinho-DF)",
+    "convenios": "Convenios_MedCmais_AMHP_ASMEPRO.pdf (05/11/2026)",
+    "ribeiro": "Decisões do Ribeiro no projeto (05/11/2026)"
+  },
+  "itens": [
+    {
+      "id": "preco-consultas",
+      "tema": "Preço das consultas médicas",
+      "gatilhos": "quanto custa consulta valor preço médico clínico geral endocrinologista endócrino ginecologista gineco psicólogo psicologia psiquiatra psiquiatria pediatra pediatria geriatra geriatria ASO admissional quanto fica",
+      "texto": "Valores (Particular / Cartão de Todos e Interlife): Clínico geral R$150 / R$80. Endocrinologia R$250 / R$100. Ginecologia R$200 / R$95. Psicologia R$150 / R$75. Psiquiatria R$250 (sem valor parceiro). Pediatria R$250 / R$120. Geriatria R$250 / R$120. ASO R$70 / R$70. Antes do preço, diga em 1 frase o valor da consulta (médicos experientes, consulta sem pressa). Pergunte se a pessoa tem convênio ou Cartão de Todos/Interlife antes de passar o valor particular.",
+      "fonte": "tabela"
+    },
+    {
+      "id": "preco-ecografias",
+      "tema": "Preço de ultrassom / ecografia",
+      "gatilhos": "ultrassom ultrassonografia ecografia eco doppler transvaginal abdomen abdominal mama tireoide obstétrico morfológico quanto custa valor",
+      "texto": "Ecografias (todas): Particular R$120 / Cartão de Todos e Interlife R$100. Ecografias com Doppler: Particular R$240 / Parceiros R$200. Se o paciente não souber se é com Doppler, peça uma foto do pedido médico.",
+      "fonte": "tabela"
+    },
+    {
+      "id": "preco-preventivo",
+      "tema": "Preço do preventivo e HPV",
+      "gatilhos": "preventivo papanicolau citologia HPV líquido exame ginecológico quanto custa valor",
+      "texto": "Preventivo: Particular R$70 / Cartão de Todos e Interlife R$40. Preventivo líquido (HPV): Particular R$240 (sem valor parceiro).",
+      "fonte": "tabela"
+    },
+    {
+      "id": "preco-exames-laboratorio",
+      "tema": "Preço de exames de sangue / laboratório",
+      "gatilhos": "exame de sangue hemograma glicemia colesterol tsh vitamina laboratório check-up checkup orçamento exames pedido médico quanto custa valor",
+      "texto": "Preço de exame de laboratório vem SÓ do Sigma (ferramenta de preços). Se o Sigma não trouxer o valor, diga que vai confirmar com a equipe e passe para humano. Peça a foto do pedido médico para orçar tudo junto. Nunca fale o total parcelado: fale a parcela (ex.: '4x de R$100', nunca 'R$400 em 4x'). Antes do preço, agregue valor: análise feita pela DASA e coleta com enfermeira de mão leve.",
+      "fonte": "ribeiro"
+    },
+    {
+      "id": "pagamento-formas",
+      "tema": "Formas de pagamento, parcelamento e desconto",
+      "gatilhos": "parcela parcelar parcelado vezes cartão crédito débito pix dinheiro à vista desconto boleto forma de pagamento aceita",
+      "texto": "Pergunte com leveza: 'Você prefere pagar em parcelinhas ou à vista com um super desconto?'. Cartão: até 12x, parcela mínima de R$100; fale sempre o valor da parcela, nunca o total. Exames à vista: 20% de desconto. Consultas particulares: 10% no Pix ou dinheiro e 7% no cartão. Não invente outro desconto nem combine condição fora disso.",
+      "fonte": "ribeiro+tabela"
+    },
+    {
+      "id": "cartao-de-todos",
+      "tema": "Cartão de Todos e Interlife",
+      "gatilhos": "cartão de todos interlife cartão desconto parceiro beneficiário tenho cartão",
+      "texto": "Beneficiários do Cartão de Todos e da Interlife pagam o valor diferenciado da tabela (ex.: clínico R$80, ginecologia R$95, pediatria R$120). Psiquiatria e Preventivo líquido (HPV) não têm valor parceiro. Peça para levar o cartão no dia.",
+      "fonte": "tabela"
+    },
+    {
+      "id": "convenios",
+      "tema": "Convênios aceitos",
+      "gatilhos": "convênio plano de saúde aceita atende pelo plano amhp asmepro geap gdf saúde inas brb saúde caixa porto seguro care plus omint notre dame pmdf cbmdf fusex postal petrobras unafisco serpro conab",
+      "texto": "Todos os médicos atendem convênio pelas redes AMHP e ASMEPRO (73 planos). O sistema confere o nome do plano na lista e avisa nos trechos se achou. Se o plano estiver na lista: diga que atende e já ofereça horário. Se não estiver ou houver dúvida (coparticipação, carência, autorização): diga que vai confirmar com a equipe e passe para humano. Nunca afirme cobertura de exame ou procedimento sem confirmação.",
+      "fonte": "convenios+ribeiro"
+    },
+    {
+      "id": "odonto-regra",
+      "tema": "Dentista: consulta odontológica gratuita",
+      "gatilhos": "dentista odonto odontologia dente dentes implante protocolo prótese aparelho ortodontia canal clareamento limpeza extração siso restauração lente faceta coroa sorriso gengiva quanto custa",
+      "texto": "Odontologia: NUNCA passe preço. Ofereça sempre a 'consulta odontológica gratuita' (nunca use a palavra 'avaliação') e frise que é sem custo. O valor do tratamento é apresentado na consulta, item por item, depois do dentista examinar. Antes, faça 1 pergunta de descoberta (o que te incomoda?).",
+      "fonte": "ribeiro"
+    },
+    {
+      "id": "odonto-pilares",
+      "tema": "Por que fazer o tratamento odontológico na MedicMais",
+      "gatilhos": "por que medicmais diferencial qualidade dentista bom confiável especialista material ambiente seguro cirurgia implante",
+      "texto": "3 pilares: 1) Dentistas especialistas: cada um cuida da sua área, ninguém 'faz tudo' ('se fosse no coração, você iria num cardiologista ou num clínico geral?'). 2) Profissional + material de alto padrão, inclusive importado: é o que fica na boca do paciente. 3) Ambiente médico-hospitalar: médico, exames e odontologia no mesmo lugar, mais seguro em procedimentos cirúrgicos.",
+      "fonte": "apostila"
+    },
+    {
+      "id": "odonto-parcelamento",
+      "tema": "Condições para tratamento odontológico",
+      "gatilhos": "implante caro não tenho dinheiro parcelar tratamento dentário boleto entrada juros condição",
+      "texto": "Não deixe a pessoa desistir por dinheiro antes de conhecer as condições: diga que a MedicMais sempre busca uma condição que caiba no bolso e que o dentista apresenta as opções na consulta odontológica gratuita. Não cite número de parcelas de tratamento odontológico até a equipe confirmar a condição vigente.",
+      "fonte": "apostila",
+      "pendente": "Apostila cita 'até 36x no boleto, sem entrada e sem juros, conforme condições vigentes'. Liberar só com OK do Ribeiro/clínica."
+    },
+    {
+      "id": "exames-valor",
+      "tema": "Por que fazer os exames na MedicMais",
+      "gatilhos": "por que fazer exame aqui laboratório confiável qualidade dasa resultado coleta onde fazer exames",
+      "texto": "Agregue valor antes do preço: as amostras são analisadas pela DASA, o mesmo grupo que analisa os exames de grandes laboratórios. A coleta é feita por enfermeira de mão leve, muito elogiada pelos pacientes. O preço é muito competitivo. Objetivo: fechar já e deixar o retorno com o médico agendado.",
+      "fonte": "exames+apostila"
+    },
+    {
+      "id": "exames-medo-agulha",
+      "tema": "Medo de agulha / coleta",
+      "gatilhos": "medo de agulha dói picada coleta tenho pavor desmaio sangue nervoso",
+      "texto": "Acolha (é muito comum ter medo de agulha). Diga que a coleta é feita por enfermeira de mão leve e que os pacientes elogiam muito a picada. Ofereça horário tranquilo.",
+      "fonte": "exames"
+    },
+    {
+      "id": "exames-ciclo",
+      "tema": "Importância de fazer os exames pedidos e voltar",
+      "gatilhos": "depois eu faço não sei se preciso exame pedido do médico retorno resultado mostrar ao médico vou deixar pra depois",
+      "texto": "Explique o ciclo: consulta → exames → retorno. Sem os exames o médico dificilmente fecha o diagnóstico, e a consulta perde o sentido. Pergunte: 'Quando foi a última vez que você fez um check-up?'. Ofereça já deixar coleta e retorno agendados.",
+      "fonte": "exames"
+    },
+    {
+      "id": "consultas-valor",
+      "tema": "Por que consultar na MedicMais",
+      "gatilhos": "médico bom por que aí consulta rápida atendimento diferencial médicos experientes confiável",
+      "texto": "Não venda só 'temos médico': venda cuidado. Os médicos são experientes, atendem na MedicMais há bastante tempo, gostam do que fazem, fazem consulta minuciosa e escutam o paciente. Nada de atendimento 'fast-food'.",
+      "fonte": "apostila"
+    },
+    {
+      "id": "descoberta",
+      "tema": "Perguntas para entender o paciente",
+      "gatilhos": "quero marcar informação dúvida estou com dor queria saber primeira vez",
+      "texto": "Antes de preço, entenda a pessoa com UMA pergunta por mensagem: 1) O que te trouxe? Alguma dor ou algo que incomoda? 2) Isso te afeta no dia a dia (sorrir, comer, dormir, trabalhar)? 3) Há quanto tempo? 4) Já procurou outra clínica? Guarde as respostas na memória do paciente: elas são usadas depois para quebrar objeções.",
+      "fonte": "apostila+fechamento"
+    },
+    {
+      "id": "fechamento",
+      "tema": "Como conduzir para o agendamento",
+      "gatilhos": "quero marcar agendar horário disponível vaga quando tem amanhã hoje semana",
+      "texto": "Conduza, não pergunte 'quer marcar?'. Use escolha: 'Prefere de manhã ou à tarde?' / 'Tenho quinta 9h ou sexta 14h, qual fica melhor?'. Confirme os dados (nome completo, CPF, especialidade, data e hora) e só marque depois do 'sim' do paciente.",
+      "fonte": "apostila+fechamento"
+    },
+    {
+      "id": "objecao-preco",
+      "tema": "Objeção: está caro / não tenho dinheiro",
+      "gatilhos": "caro muito caro não tenho dinheiro sem grana apertado não posso pagar mais barato tá puxado",
+      "texto": "Não discuta preço. 1) Acolha. 2) Lembre o que ELE disse da dor e do tempo. 3) Reforce o valor (especialistas, qualidade, cuidado). 4) Mostre a condição: parcela (até 12x, mínimo R$100), 20% à vista em exames, valor Cartão de Todos se tiver, convênio se tiver. Odonto: consulta gratuita para conhecer as condições. Feche com escolha de horário.",
+      "fonte": "apostila+fechamento+ribeiro"
+    },
+    {
+      "id": "objecao-concorrencia",
+      "tema": "Objeção: vou orçar em outro lugar / outro é mais barato",
+      "gatilhos": "vou cotar orçar em outro lugar pesquisar preço outro laboratório outra clínica mais barato concorrente sabin exame amor saúde vi mais barato",
+      "texto": "Diga com segurança que o preço da MedicMais é muito competitivo e costuma ganhar orçamentos de outros lugares, com análise DASA e coleta de mão leve. Pergunte o que pesa mais para ele (preço, horário, confiança) e ofereça a melhor condição permitida (parcela ou 20% à vista em exames). Não fale mal de outra clínica nem cite nomes.",
+      "fonte": "exames+apostila"
+    },
+    {
+      "id": "objecao-vou-pensar",
+      "tema": "Objeção: vou pensar / depois eu vejo",
+      "gatilhos": "vou pensar depois vejo vou ver deixa eu ver te falo depois vou falar com marido esposa família",
+      "texto": "Respeite, mas descubra a dúvida real: 'Claro! Ficou alguma dúvida sobre valor, horário ou o tratamento em si?'. Responda essa dúvida. Se ainda quiser pensar, pergunte quando pode chamar de novo e registre o follow-up com data.",
+      "fonte": "apostila"
+    },
+    {
+      "id": "objecao-tempo",
+      "tema": "Objeção: não é urgente / deixo para depois",
+      "gatilhos": "não é urgente não tenho tempo agora mais pra frente ano que vem esperar adiar",
+      "texto": "Pergunte há quanto tempo ele convive com isso e como tem afetado o dia a dia. Mostre que problema de saúde e de dente tende a virar bola de neve: quanto antes, mais simples. Ofereça um horário próximo.",
+      "fonte": "apostila"
+    },
+    {
+      "id": "objecao-ocupado",
+      "tema": "Objeção: estou ocupado / trabalho",
+      "gatilhos": "ocupado trabalho correria sem tempo agora não posso horário difícil depois do trabalho sábado",
+      "texto": "Não discuta, facilite: 'Qual horário costuma ser mais tranquilo pra você?'. Ofereça o horário mais próximo disso. Se não puder falar agora, pergunte quando pode chamar e registre o follow-up com data e hora. Cliente ocupado não é cliente perdido.",
+      "fonte": "apostila"
+    },
+    {
+      "id": "objecao-distancia",
+      "tema": "Objeção: é longe",
+      "gatilhos": "longe distância moro longe não sou de sobradinho transporte ônibus difícil chegar",
+      "texto": "Não aceite a distância como barreira final: pergunte a rotina e tente encaixar a ida à clínica num dia em que a pessoa já passa pela região, juntando tudo numa só visita (consulta + exames).",
+      "fonte": "apostila",
+      "pendente": "Apostila cita 'ISCA: Vale-hemograma'. Regras do vale não descritas: robô não oferece até a clínica explicar."
+    },
+    {
+      "id": "objecao-medo",
+      "tema": "Objeção: medo (dentista, procedimento, cirurgia)",
+      "gatilhos": "medo tenho medo de dentista pavor dor anestesia cirurgia nervoso trauma",
+      "texto": "Acolha sem pressa. O medo diminui quando a confiança aumenta: ambiente médico-hospitalar, profissional especialista e material de qualidade. Convide para a consulta odontológica gratuita só para conversar e conhecer, sem compromisso.",
+      "fonte": "apostila"
+    },
+    {
+      "id": "objecao-convenio-nao-aceito",
+      "tema": "Objeção: não tenho convênio / plano não aceito",
+      "gatilhos": "não tenho convênio não tenho plano meu plano não está particular sem plano",
+      "texto": "Mostre as opções: valor de Cartão de Todos/Interlife (se tiver), particular com 10% no Pix/dinheiro ou parcelado em até 12x (mínimo R$100 por parcela). Odonto: consulta gratuita.",
+      "fonte": "tabela+ribeiro"
+    },
+    {
+      "id": "saude-day",
+      "tema": "Saúde Day (atendimento gratuito)",
+      "gatilhos": "saúde day consulta gratuita de graça grátis evento mutirão atendimento gratuito sábado",
+      "texto": "O Saúde Day é o dia em que a MedicMais abre as portas para atendimento gratuito à população de Sobradinho: consulta médica gratuita e consulta odontológica gratuita. Exames pedidos no dia têm 50% de desconto (só no Saúde Day). Data, vagas e regras: só a equipe confirma; nunca invente data, passe para humano ou use o aviso cadastrado.",
+      "fonte": "apostila"
+    },
+    {
+      "id": "retorno-gratuito",
+      "tema": "Retorno gratuito no 2º sábado",
+      "gatilhos": "retorno mostrar exame resultado pagar de novo nova consulta segundo sábado",
+      "texto": "Todo segundo sábado do mês a MedicMais abre para atendimento gratuito: o paciente pode voltar para mostrar os resultados dos exames sem pagar nova consulta.",
+      "fonte": "apostila",
+      "pendente": "Na apostila isso aparece dentro do Saúde Day. Confirmar com a clínica se vale para todo paciente ou só para quem veio no Saúde Day."
+    },
+    {
+      "id": "empatia",
+      "tema": "Paciente com dor, preocupado ou com criança",
+      "gatilhos": "estou com dor muita dor preocupada meu filho minha filha criança bebê mãe doente triste vergonha",
+      "texto": "Nosso público é sensível: quem procura clínica geralmente está passando por algo. Seja acolhedor, sem pressa, elogie quando couber. Trate com carinho os filhos do paciente. Avise se houver espera.",
+      "fonte": "apostila"
+    },
+    {
+      "id": "urgencia",
+      "tema": "Sinais de urgência",
+      "gatilhos": "falta de ar dor no peito desmaiou sangramento forte convulsão infarto avc emergência urgente grave",
+      "texto": "Se houver sinal de emergência (dor no peito, falta de ar forte, desmaio, sangramento intenso, convulsão), oriente na hora a ligar 192 (SAMU) ou ir ao pronto-socorro mais próximo, e chame a equipe. Não marque consulta como resposta a uma emergência.",
+      "fonte": "regra de segurança da agência"
+    },
+    {
+      "id": "nao-sei",
+      "tema": "Quando não há informação",
+      "gatilhos": "endereço horário funcionamento estacionamento resultado online laudo nota fiscal reembolso",
+      "texto": "Se a resposta não estiver na base, no Sigma ou nas regras da clínica, não invente: diga 'Vou confirmar com a equipe e já te retorno' e passe para humano.",
+      "fonte": "ribeiro"
+    }
+  ]
+}

@@ -1,0 +1,298 @@
+{
+ "fonte": "Convenios_MedCmais_AMHP_ASMEPRO.pdf (05/11/2026)",
+ "regra": "Todos os médicos atendem por convênio (Ribeiro, 05/11). Coparticipação/autorização: equipe confirma.",
+ "convenios": [
+  {
+   "nome": "AFEB BRASAL",
+   "rede": "AMHP"
+  },
+  {
+   "nome": "AFFEGO",
+   "rede": "AMHP"
+  },
+  {
+   "nome": "AGF - ALLIANZ SAÚDE",
+   "rede": "ASMEPRO"
+  },
+  {
+   "nome": "ANAFE SAÚDE",
+   "rede": "AMHP"
+  },
+  {
+   "nome": "BACEN",
+   "rede": "AMHP"
+  },
+  {
+   "nome": "BACEN - BANCO CENTRAL",
+   "rede": "ASMEPRO"
+  },
+  {
+   "nome": "BRB (SAÚDE BRB)",
+   "rede": "AMHP"
+  },
+  {
+   "nome": "BRB SAÚDE - REGIUS",
+   "rede": "ASMEPRO"
+  },
+  {
+   "nome": "CAEME - GO",
+   "rede": "AMHP"
+  },
+  {
+   "nome": "CAESAN",
+   "rede": "AMHP"
+  },
+  {
+   "nome": "CAMED",
+   "rede": "AMHP"
+  },
+  {
+   "nome": "CARE PLUS",
+   "rede": "AMHP"
+  },
+  {
+   "nome": "CASEC (CODEVASF)",
+   "rede": "AMHP"
+  },
+  {
+   "nome": "CASEMBRAPA (EMBRAPA)",
+   "rede": "AMHP"
+  },
+  {
+   "nome": "CBMDF",
+   "rede": "AMHP"
+  },
+  {
+   "nome": "CLIQUE MÉDICOS",
+   "rede": "AMHP"
+  },
+  {
+   "nome": "CNTI",
+   "rede": "AMHP"
+  },
+  {
+   "nome": "CODEVASF- CASEC",
+   "rede": "ASMEPRO"
+  },
+  {
+   "nome": "CONAB",
+   "rede": "AMHP e ASMEPRO"
+  },
+  {
+   "nome": "CÂMARA DOS DEPUTADOS",
+   "rede": "ASMEPRO"
+  },
+  {
+   "nome": "EMBRATEL (TELOS)",
+   "rede": "AMHP"
+  },
+  {
+   "nome": "EVIDA - LUMINAR SAÚDE",
+   "rede": "ASMEPRO"
+  },
+  {
+   "nome": "FAPES (BNDES)",
+   "rede": "AMHP"
+  },
+  {
+   "nome": "FASCAL",
+   "rede": "AMHP e ASMEPRO"
+  },
+  {
+   "nome": "FUSEX",
+   "rede": "ASMEPRO"
+  },
+  {
+   "nome": "GAMA SAÚDE",
+   "rede": "ASMEPRO"
+  },
+  {
+   "nome": "GDF SAÚDE",
+   "rede": "AMHP"
+  },
+  {
+   "nome": "GDF SAÚDE - INAS",
+   "rede": "ASMEPRO"
+  },
+  {
+   "nome": "GEAP",
+   "rede": "AMHP"
+  },
+  {
+   "nome": "GRAVIA",
+   "rede": "AMHP"
+  },
+  {
+   "nome": "LIFE EMPRESARIAL",
+   "rede": "AMHP"
+  },
+  {
+   "nome": "LUMINAR SAÚDE (EVIDA)",
+   "rede": "AMHP"
+  },
+  {
+   "nome": "NOTRE DAME",
+   "rede": "AMHP"
+  },
+  {
+   "nome": "NOVA SAÚDE",
+   "rede": "ASMEPRO"
+  },
+  {
+   "nome": "OMINT SAÚDE",
+   "rede": "AMHP"
+  },
+  {
+   "nome": "PETROBRÁS PETRÓLEO BRASILEIRO",
+   "rede": "ASMEPRO"
+  },
+  {
+   "nome": "PF SAÚDE (POLÍCIA FEDERAL)",
+   "rede": "AMHP"
+  },
+  {
+   "nome": "PF SAÚDE - POLICIA FEDERAL",
+   "rede": "ASMEPRO"
+  },
+  {
+   "nome": "PLAN ASSISTE (MPU)",
+   "rede": "AMHP"
+  },
+  {
+   "nome": "PLAN-ASSISTE - MPU",
+   "rede": "ASMEPRO"
+  },
+  {
+   "nome": "PLAS/JMU (STM)",
+   "rede": "AMHP"
+  },
+  {
+   "nome": "PMDF - CONSULTAS MÉDICAS",
+   "rede": "AMHP"
+  },
+  {
+   "nome": "PMDF - SAÚDE MENTAL E TERAPIAS",
+   "rede": "AMHP"
+  },
+  {
+   "nome": "PORTO SEGURO",
+   "rede": "ASMEPRO"
+  },
+  {
+   "nome": "POSTAL SAÚDE - CORREIOS",
+   "rede": "ASMEPRO"
+  },
+  {
+   "nome": "PROASA",
+   "rede": "AMHP e ASMEPRO"
+  },
+  {
+   "nome": "PRÓ-SAÚDE (CÂMARA DOS DEPUTADOS)",
+   "rede": "AMHP"
+  },
+  {
+   "nome": "PRÓ-SAÚDE (TJDFT)",
+   "rede": "AMHP"
+  },
+  {
+   "nome": "PRÓ-SER (STJ)",
+   "rede": "AMHP"
+  },
+  {
+   "nome": "PRÓ-SOCIAL (TRF)",
+   "rede": "AMHP"
+  },
+  {
+   "nome": "REAL GRANDEZA (DEMAIS PLANOS)",
+   "rede": "AMHP"
+  },
+  {
+   "nome": "REAL GRANDEZA (SALVUS E SALUTEM)",
+   "rede": "AMHP"
+  },
+  {
+   "nome": "SAÚDE CAIXA",
+   "rede": "AMHP e ASMEPRO"
+  },
+  {
+   "nome": "SAÚDE PETROBRAS",
+   "rede": "AMHP"
+  },
+  {
+   "nome": "SERPRO",
+   "rede": "AMHP"
+  },
+  {
+   "nome": "SIS SENADO",
+   "rede": "AMHP"
+  },
+  {
+   "nome": "SIS SENADO FEDERAL",
+   "rede": "ASMEPRO"
+  },
+  {
+   "nome": "STF - MED",
+   "rede": "ASMEPRO"
+  },
+  {
+   "nome": "STF-MED (STF)",
+   "rede": "AMHP"
+  },
+  {
+   "nome": "STJ - PRÓ SER",
+   "rede": "ASMEPRO"
+  },
+  {
+   "nome": "STM - PLAS-JMU",
+   "rede": "ASMEPRO"
+  },
+  {
+   "nome": "T.J.D.F.T - PRÓ SAÚDE",
+   "rede": "ASMEPRO"
+  },
+  {
+   "nome": "T.R.E - TRIBUNAL REGIONAL ELEITORAL",
+   "rede": "ASMEPRO"
+  },
+  {
+   "nome": "TRE SAÚDE",
+   "rede": "AMHP"
+  },
+  {
+   "nome": "TRF - TRIBUNAL REGIONAL FEDERAL",
+   "rede": "ASMEPRO"
+  },
+  {
+   "nome": "TRT - TRIBUNAL REGIONAL DO TRABALHO",
+   "rede": "ASMEPRO"
+  },
+  {
+   "nome": "TRT SAÚDE",
+   "rede": "AMHP"
+  },
+  {
+   "nome": "TST - TRIBUNAL SUPERIOR DO TRABALHO",
+   "rede": "ASMEPRO"
+  },
+  {
+   "nome": "TST SAÚDE",
+   "rede": "AMHP"
+  },
+  {
+   "nome": "UNAFISCO SAÚDE (DEMAIS PLANOS)",
+   "rede": "AMHP"
+  },
+  {
+   "nome": "UNAFISCO SAÚDE (PREMIUM)",
+   "rede": "AMHP"
+  },
+  {
+   "nome": "UNAFISCO SAÚDE (SINDIFISCO)",
+   "rede": "ASMEPRO"
+  },
+  {
+   "nome": "UNIVIDA - PROCESSO",
+   "rede": "ASMEPRO"
+  }
+ ]
+}
