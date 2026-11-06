@@ -283,6 +283,7 @@
         <div class="card-box tr-box"><div class="cb-head"><h3>Convênios</h3>${edBtn('convenios')}</div><div class="tr-in"><p class="tr-nota">${b.convenios.length} planos. ${esc(b.regra_convenio)}</p>
           <label class="search"><svg class="ic"><use href="#i-search"/></svg><input class="inp" id="tr-conv-busca" type="search" placeholder="Procurar plano (ex.: GEAP, Saúde Caixa)" aria-label="Procurar convênio"></label>
           <ul class="tr-conv" id="tr-conv"></ul></div></div>
+        ${caixaDocs(b)}
         ${grupos.map(([n, its]) => caixa(n, its)).join('')}
       </div>`;
     const lista = () => {
@@ -292,6 +293,44 @@
     };
     $('tr-conv-busca').addEventListener('input', lista); lista();
     if (S.ativos) renderAtivos(); loadAtivos();
+  }
+
+  /* ---------- documentos originais (guia da Maria) ---------- */
+  const FONTES_DOC = { apostila: 'Apostila de treinamento geral', fechamento: 'Script: o fechamento', exames: 'Como vender mais exames', tabela: 'Tabela de preços', convenios: 'Convênios AMHP e ASMEPRO' };
+  const kb = (n) => n > 1048576 ? (n / 1048576).toFixed(1).replace('.', ',') + ' MB' : Math.max(1, Math.round(n / 1024)) + ' KB';
+  function caixaDocs(b) {
+    const docs = b.documentos || [];
+    const usados = (f) => b.itens.filter((i) => String(i.fonte || '').split('+').includes(f));
+    const linhas = Object.entries(FONTES_DOC).map(([f, nome]) => {
+      const ds = docs.filter((d) => d.fonte === f), us = usados(f);
+      return `<li class="tdoc"><div class="tdoc-h"><b>${esc(nome)}</b>${ds.length ? '<span class="tag ok">guardado</span>' : '<span class="tag">falta enviar</span>'}</div>
+        ${ds.map((d) => `<button type="button" class="tdoc-a" data-doc="${d.id}">${icon('i-book')}${esc(d.nome)} <small>${kb(d.tamanho)} · ${esc(ago(d.enviado_em))}</small></button>`).join('')}
+        <small class="tdoc-u">A Maria usa ${us.length} ${us.length === 1 ? 'assunto' : 'assuntos'} deste documento${us.length ? ': ' + us.slice(0, 4).map((i) => esc(i.tema)).join(', ') + (us.length > 4 ? '…' : '') : ''}.</small>
+        <label class="btn btn-ghost btn-sm tdoc-up">${icon('i-plus')}${ds.length ? 'Enviar versão nova' : 'Enviar arquivo'}<input type="file" hidden data-tdoc-up="${f}" accept=".pdf,.doc,.docx,.xls,.xlsx,.txt,.md,image/*"></label></li>`;
+    }).join('');
+    const extras = docs.filter((d) => !FONTES_DOC[d.fonte]);
+    return `<div class="card-box tr-box"><div class="cb-head"><h3>Documentos da clínica</h3><span class="cb-sub">guia da Maria</span></div><div class="tr-in">
+      <p class="tr-nota">Os originais que ensinam a Maria. Ficam guardados no banco do painel e nunca são apagados: uma versão nova entra ao lado da antiga.</p>
+      <ul class="tdocs">${linhas}${extras.map((d) => `<li class="tdoc"><button type="button" class="tdoc-a" data-doc="${d.id}">${icon('i-book')}${esc(d.nome)} <small>${kb(d.tamanho)} · ${esc(ago(d.enviado_em))}</small></button>${d.descricao ? `<small class="tdoc-u">${esc(d.descricao)}</small>` : ''}</li>`).join('')}</ul>
+      <label class="btn btn-ghost btn-sm tdoc-up">${icon('i-plus')}Outro documento<input type="file" hidden data-tdoc-up="outro" accept=".pdf,.doc,.docx,.xls,.xlsx,.txt,.md,image/*"></label></div></div>`;
+  }
+  $('v-treino').addEventListener('change', async (e) => {
+    const inp = e.target.closest('[data-tdoc-up]'); if (!inp || !inp.files[0]) return;
+    const f = inp.files[0];
+    if (f.size > 3000000) { toast('Arquivo grande demais (máximo 3 MB).', 'err'); inp.value = ''; return; }
+    const base64 = await new Promise((ok, no) => { const r = new FileReader(); r.onload = () => ok(String(r.result).split(',')[1]); r.onerror = no; r.readAsDataURL(f); });
+    const lbl = inp.parentElement; lbl.classList.add('is-loading');
+    try { S.base = await api('POST', '/api/base', { nome: f.name, tipo: f.type || 'application/octet-stream', base64, fonte: inp.dataset.docUp === 'outro' ? null : inp.dataset.docUp }); renderTreino(); toast('Documento guardado.'); }
+    catch (er) { lbl.classList.remove('is-loading'); if (er.status !== 401) toast(msgErro(er), 'err'); }
+  });
+  async function baixaDoc(id) {
+    try {
+      const d = await api('GET', '/api/base?doc=' + encodeURIComponent(id));
+      const bin = atob(d.base64), u8 = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+      const url = URL.createObjectURL(new Blob([u8], { type: d.tipo }));
+      const a = document.createElement('a'); a.href = url; a.download = d.nome; document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 60000);
+    } catch (er) { if (er.status !== 401) toast(msgErro(er), 'err'); }
   }
 
   /* ---------- edição do treinamento (salva no banco; o robô lê a mesma tabela) ---------- */
@@ -381,6 +420,7 @@
     };
   }
   $('v-treino').addEventListener('click', (e) => {
+    const dc = e.target.closest('[data-doc]'); if (dc) { baixaDoc(dc.dataset.doc); return; }
     const it = e.target.closest('[data-tr-item]'); if (it) { e.preventDefault(); editaItem(it.dataset.trItem); return; }
     const ed = e.target.closest('[data-tr-ed]'); if (!ed) return;
     ({ precos: editaPrecos, convenios: editaConvenios, textos: editaTextos })[ed.dataset.trEd]();
@@ -1785,7 +1825,7 @@
     return {
       midia: (arq) => new Promise((res, rej) => setTimeout(() => { if (/offline/i.test(arq)) rej(new Error('offline')); else midiaDemo(arq).then(res, rej); }, 250)),
       handle(method, path, body) {
-        if (path === '/api/base') { if (method === 'PUT') return Promise.reject(new ApiError(400, 'Na demonstração nada é salvo.')); return Promise.all(['conhecimento', 'convenios', 'precos', 'textos-ativos'].map((f) => fetch('/robo/base/' + f + '.json').then((x) => x.json()))).then(([k, c, pr, ta]) => ({ versao: k.versao, itens: k.itens, convenios: c.convenios, regra_convenio: c.regra, precos: pr, textos_ativos: ta })); }
+        if (path === '/api/base') { if (method !== 'GET') return Promise.reject(new ApiError(400, 'Na demonstração nada é salvo.')); return Promise.all(['conhecimento', 'convenios', 'precos', 'textos-ativos'].map((f) => fetch('/robo/base/' + f + '.json').then((x) => x.json()))).then(([k, c, pr, ta]) => ({ versao: k.versao, itens: k.itens, convenios: c.convenios, regra_convenio: c.regra, precos: pr, textos_ativos: ta, fontes: k.fontes, documentos: [] })); }
         if (!db) { db = seed(); setTimeout(() => { const l = db.leads.find((x) => x.nome === 'Helena Simulada'); if (l) { l.precisa_humano = true; l.atualizado_em = iso(0); } }, 25000); /* demonstra o alerta de humano */ }
         return new Promise((res, rej) => setTimeout(() => { try { res(JSON.parse(JSON.stringify(route(method, path, body || {})))); } catch (e) { rej(e); } }, 140));
       }
