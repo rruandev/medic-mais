@@ -1,0 +1,31 @@
+{
+  "nota": "Textos das mensagens automáticas. Campos: {ola} (Bom dia, Nome!), {nome}, {profissional}, {quando}, {hora}, {assunto}. Cada tipo pode ter mais de uma versão; o robô sorteia uma.",
+  "tipos": {
+    "confirmacao": { "nome": "Confirmação de consulta (véspera)", "textos": [
+      "{ola} Aqui é a Maria, do atendimento da MedicMais Sobradinho 💙\nPassando para confirmar sua consulta com {profissional} {quando}, às {hora}.\n\nResponda:\n1 - Confirmo\n2 - Preciso remarcar\n3 - Não vou poder ir",
+      "{ola} É a Maria, do atendimento da MedicMais Sobradinho 💙\nSua consulta com {profissional} está marcada para {quando}, às {hora}. Posso confirmar?\n\n1 - Sim, confirmo\n2 - Quero remarcar\n3 - Não poderei ir"
+    ] },
+    "lembrete_dia": { "nome": "Lembrete no dia", "textos": [
+      "{ola} Te esperamos hoje às {hora} com {profissional} na MedicMais Sobradinho 💙 Se puder, chegue 10 minutinhos antes."
+    ] },
+    "falta": { "nome": "Paciente faltou", "textos": [
+      "{ola} Aqui é a Maria, do atendimento da MedicMais. Sentimos sua falta na consulta de ontem com {profissional}. Está tudo bem? Quer que eu veja um novo horário pra você?"
+    ] },
+    "followup": { "nome": "Follow-up (24 h sem agendar)", "textos": [
+      "{ola} Aqui é a Maria, do atendimento da MedicMais 💙 Ficou alguma dúvida sobre {assunto}? Se quiser, já vejo um horário pra você.",
+      "{ola} Passando para saber se consigo te ajudar com {assunto}. Tenho horários essa semana, prefere manhã ou tarde?"
+    ] },
+    "followup_2": { "nome": "Follow-up final (72 h)", "textos": [
+      "{ola} Não quero te incomodar, é só para não deixar você sem resposta. Quando quiser cuidar de {assunto}, é só me chamar aqui 💙"
+    ] },
+    "pediu_para_chamar": { "nome": "Pediu para chamar depois", "textos": [
+      "{ola} Combinamos de conversar hoje 😊 Aqui é a Maria, do atendimento da MedicMais. Vamos ver aquele horário para {assunto}? Prefere manhã ou tarde?"
+    ] },
+    "exames": { "nome": "Exames pedidos e não feitos", "textos": [
+      "{ola} Aqui é a Maria, do atendimento da MedicMais 💙 Vi que o(a) {profissional} pediu alguns exames. Quer que eu já deixe sua coleta agendada? A análise é da DASA e a nossa enfermeira tem a mão leve 😉"
+    ] },
+    "retorno": { "nome": "Retorno com resultados", "textos": [
+      "{ola} Seus exames já ficaram prontos? Lembrando que você pode voltar para mostrar os resultados ao médico. Quer que eu reserve seu retorno?"
+    ] }
+  }
+}
