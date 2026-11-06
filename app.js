@@ -238,7 +238,7 @@
   const TIPO_ATIVO = { confirmacao: 'Confirmação de consulta', lembrete_dia: 'Lembrete do dia', falta: 'Faltou', followup: 'Follow-up', exames: 'Exames', retorno: 'Retorno', campanha: 'Campanha' };
   const ST_ATIVO = { pendente: 'na fila', aprovado: 'aprovado', enviado: 'enviado', respondido: 'respondeu', cancelado: 'cancelado', erro: 'erro' };
   function loadAtivos() {
-    return api('GET', '/api/ativos').then((r) => { S.ativos = r; renderAtivos(); }).catch(() => { const el = $('tr-ativos'); if (el) el.innerHTML = '<p class="tr-nota">Não consegui carregar agora. O painel tenta de novo sozinho.</p>'; });
+    return api('GET', '/api/robo?parte=ativos').then((r) => { S.ativos = r; renderAtivos(); }).catch(() => { const el = $('tr-ativos'); if (el) el.innerHTML = '<p class="tr-nota">Não consegui carregar agora. O painel tenta de novo sozinho.</p>'; });
   }
   function renderAtivos() {
     const a = S.ativos, el = $('tr-ativos'); if (!a || !el) return;
@@ -255,7 +255,7 @@
     const b = e.target.closest && e.target.closest('[data-ativo]'); if (!b || !S.ativos) return;
     const tipo = b.dataset.ativo, ativo = !S.ativos[tipo];
     b.disabled = true;
-    try { S.ativos = await api('POST', '/api/ativos', { tipo, ativo }); renderAtivos(); toast(ativo ? 'Ligado.' : 'Desligado.'); }
+    try { S.ativos = await api('POST', '/api/robo?parte=ativos', { tipo, ativo }); renderAtivos(); toast(ativo ? 'Ligado.' : 'Desligado.'); }
     catch (err) { toast(msgErro(err), 'err'); b.disabled = false; }
   });
   const reais = (v) => v == null ? '—' : typeof v === 'number' ? 'R$ ' + v.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : esc(v);
@@ -1712,7 +1712,7 @@
       if (p === '/api/contexto') return rotaContexto(method, q, body);
       if (p === '/api/humano') return { ultima_in: (() => { const m = db.msgs.filter((x) => x.direcao === 'in').sort((a, b) => b.id - a.id)[0]; return m ? { id: m.id, telefone: m.telefone } : null; })(), humano: db.leads.filter((l) => l.precisa_humano).map((l) => ({ id: l.id, telefone: l.telefone, nome: l.nome, motivo_humano: l.motivo_humano, etapa: l.etapa, atualizado_em: l.atualizado_em })) };
       if (p === '/api/profissionais') return { profissionais: PROFS };
-      if (p === '/api/ativos') { db.ativos = db.ativos || { confirmacao: false, followup: false, campanha: false, limite_dia: 80, janela: '08:00-19:00', enviados_hoje: 0, envios: [] }; if (method === 'POST') db.ativos[body.tipo] = !!body.ativo; return db.ativos; }
+      if (p === '/api/robo' && q.get('parte') === 'ativos') { db.ativos = db.ativos || { confirmacao: false, followup: false, campanha: false, limite_dia: 80, janela: '08:00-19:00', enviados_hoje: 0, envios: [] }; if (method === 'POST') db.ativos[body.tipo] = !!body.ativo; return db.ativos; }
       if (p === '/api/robo') { if (method === 'POST') db.robo = !!body.ativo; return { ativo: db.robo !== false }; }
       if (p === '/api/agenda') { const i = q.get('inicio'), f = q.get('fim'); return { inicio: i, fim: f, profissionais: PROFS, agendamentos: db.ags.filter((a) => a.data >= i && a.data <= f).sort((a, b) => (a.data + a.hora).localeCompare(b.data + b.hora)).map(snap), servicos: SVS.map((s) => Object.assign({}, s)) }; }
       if (p === '/api/leads' && method === 'GET') return { leads: db.leads.slice().sort((a, b) => (b.precisa_humano - a.precisa_humano) || (new Date(b.atualizado_em) - new Date(a.atualizado_em))) };
