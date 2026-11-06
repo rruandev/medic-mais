@@ -13,21 +13,21 @@
       "id": "preco-consultas",
       "tema": "Preço das consultas médicas",
       "gatilhos": "quanto custa consulta valor preço médico clínico geral endocrinologista endócrino ginecologista gineco psicólogo psicologia psiquiatra psiquiatria pediatra pediatria geriatra geriatria ASO admissional quanto fica",
-      "texto": "Valores (Particular / Cartão de Todos e Interlife): Clínico geral R$150 / R$80. Endocrinologia R$250 / R$100. Ginecologia R$200 / R$95. Psicologia R$150 / R$75. Psiquiatria R$250 (sem valor parceiro). Pediatria R$250 / R$120. Geriatria R$250 / R$120. ASO R$70 / R$70. Antes do preço, diga em 1 frase o valor da consulta (médicos experientes, consulta sem pressa). Pergunte se a pessoa tem convênio ou Cartão de Todos/Interlife antes de passar o valor particular.",
+      "texto": "Valores das consultas (particular e Cartão de Todos/Interlife): use SÓ a TABELA DE VALORES (é a tabela de preços do painel). Antes do preço, diga em 1 frase o valor da consulta (médicos experientes, consulta sem pressa). Pergunte se a pessoa tem convênio ou Cartão de Todos/Interlife antes de passar o valor particular.",
       "fonte": "tabela"
     },
     {
       "id": "preco-ecografias",
       "tema": "Preço de ultrassom / ecografia",
       "gatilhos": "ultrassom ultrassonografia ecografia eco doppler transvaginal abdomen abdominal mama tireoide obstétrico morfológico quanto custa valor",
-      "texto": "Ecografias (todas): Particular R$120 / Cartão de Todos e Interlife R$100. Ecografias com Doppler: Particular R$240 / Parceiros R$200. Se o paciente não souber se é com Doppler, peça uma foto do pedido médico.",
+      "texto": "Valores de ecografia/ultrassom (comum e com Doppler): use SÓ a TABELA DE VALORES. Se o paciente não souber se é com Doppler, peça uma foto do pedido médico.",
       "fonte": "tabela"
     },
     {
       "id": "preco-preventivo",
       "tema": "Preço do preventivo e HPV",
       "gatilhos": "preventivo papanicolau citologia HPV líquido exame ginecológico quanto custa valor",
-      "texto": "Preventivo: Particular R$70 / Cartão de Todos e Interlife R$40. Preventivo líquido (HPV): Particular R$240 (sem valor parceiro).",
+      "texto": "Valores do preventivo e do preventivo líquido (HPV): use SÓ a TABELA DE VALORES.",
       "fonte": "tabela"
     },
     {
@@ -48,7 +48,7 @@
       "id": "cartao-de-todos",
       "tema": "Cartão de Todos e Interlife",
       "gatilhos": "cartão de todos interlife cartão desconto parceiro beneficiário tenho cartão",
-      "texto": "Beneficiários do Cartão de Todos e da Interlife pagam o valor diferenciado da tabela (ex.: clínico R$80, ginecologia R$95, pediatria R$120). Psiquiatria e Preventivo líquido (HPV) não têm valor parceiro. Peça para levar o cartão no dia.",
+      "texto": "Beneficiários do Cartão de Todos e da Interlife pagam o valor diferenciado que está na TABELA DE VALORES. Serviço sem valor de cartão parceiro na tabela não tem esse benefício. Peça para levar o cartão no dia.",
       "fonte": "tabela"
     },
     {
