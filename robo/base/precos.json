@@ -1,0 +1,17 @@
+{
+  "fonte": "tabela_precos_medicmais.pdf (Sobradinho-DF) + decisões do Ribeiro (05/11/2026)",
+  "grupos": [
+    { "nome": "Consultas e atendimentos", "itens": [
+      ["Clínico geral", 150, 80], ["Endocrinologia", 250, 100], ["Ginecologia", 200, 95], ["Psicologia", 150, 75],
+      ["Psiquiatria", 250, null], ["Pediatria", 250, 120], ["Geriatria", 250, 120], ["ASO", 70, 70] ] },
+    { "nome": "Ultrassonografias", "itens": [ ["Ecografias (todas)", 120, 100], ["Ecografias com Doppler", 240, 200] ] },
+    { "nome": "Exames", "itens": [ ["Preventivo", 70, 40], ["Preventivo líquido (HPV)", 240, null], ["Exames de laboratório (sangue)", "Sigma", "Sigma"] ] }
+  ],
+  "regras": [
+    "Particular: 10% de desconto no Pix ou dinheiro, 7% no cartão (tabela).",
+    "Exames à vista: 20% de desconto (Ribeiro).",
+    "Cartão: até 12x, parcela mínima de R$ 100. Falar sempre a parcela, nunca o total.",
+    "Cartão de Todos e Interlife: valor da 2ª coluna; levar o cartão no dia.",
+    "Odontologia: nunca passar preço por WhatsApp. Oferecer a consulta odontológica gratuita (nunca dizer 'avaliação')."
+  ]
+}

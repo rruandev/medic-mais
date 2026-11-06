@@ -3,4 +3,5 @@ _dev
 .env*
 .vercel
 node_modules
-robo
+robo/testes
+robo/n8n

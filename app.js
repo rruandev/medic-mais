@@ -21,7 +21,8 @@
     { id: 'dashboard', nome: 'Painel', icon: 'i-dash' },
     { id: 'agenda', nome: 'Agenda', icon: 'i-cal' },
     { id: 'conversas', nome: 'Conversas', icon: 'i-chat' },
-    { id: 'funil', nome: 'Funil', icon: 'i-funnel' }
+    { id: 'funil', nome: 'Funil', icon: 'i-funnel' },
+    { id: 'treino', nome: 'Treinamento', icon: 'i-book' }
   ];
   /* grade da agenda */
   const HH = 56, START = 480, END = 1080, ROWS = (END - START) / 30;
@@ -221,15 +222,52 @@
     if (id === 'dashboard' && !S.resumo) el.innerHTML = skelDashboard();
     if (id === 'agenda') { if (!el.dataset.built) buildAgendaShell(); updateAgendaToolbar(); }
     if (id === 'conversas' && !el.dataset.built) { buildConversas(); $('cv-list').innerHTML = '<div style="padding:12px">' + '<div class="sk sk-row"></div>'.repeat(5) + '</div>'; }
+    if (id === 'treino' && !S.base) el.innerHTML = '<div class="sk sk-card"></div><div class="sk sk-card"></div>';
     if (id === 'funil' && !S.leads) el.innerHTML = funilHead() + '<div class="kanban">' + ETAPAS.map(() => '<div class="col"><div class="sk sk-card"></div><div class="sk sk-card"></div></div>').join('') + '</div>';
   }
+
+  /* =====================================================================
+     TREINAMENTO: o que a Maria sabe (preços, pagamento, convênios, como vende).
+     Mesma base que o robô usa (robo/base/*.json). Só leitura.
+     ===================================================================== */
+  function loadTreino() {
+    if (S.base) return Promise.resolve();
+    return api('GET', '/api/base').then((r) => { S.base = r; renderTreino(); });
+  }
+  const reais = (v) => v == null ? '—' : typeof v === 'number' ? 'R$ ' + v.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : esc(v);
+  const GRUPOS_TREINO = [
+    ['Como vender', (i) => /^(descoberta|fechamento|consultas-valor|exames-valor|exames-ciclo|odonto-pilares|empatia)$/.test(i.id)],
+    ['Objeções', (i) => /^(objecao-|exames-medo)/.test(i.id)],
+    ['Regras e avisos', (i) => /^(odonto-regra|odonto-parcelamento|convenios|cartao-de-todos|pagamento-formas|saude-day|retorno-gratuito|urgencia|nao-sei|preco-exames-laboratorio)$/.test(i.id)]
+  ];
+  function renderTreino() {
+    const b = S.base, el = $('v-treino');
+    const precos = b.precos.grupos.map((g) => `<h4 class="tr-g">${esc(g.nome)}</h4><table class="tr-tab"><thead><tr><th>Serviço</th><th>Particular</th><th>Cartão de Todos / Interlife</th></tr></thead><tbody>${g.itens.map((it) => `<tr><td>${esc(it[0])}</td><td>${reais(it[1])}</td><td>${reais(it[2])}</td></tr>`).join('')}</tbody></table>`).join('');
+    const regras = `<ul class="tr-regras">${b.precos.regras.map((r) => `<li>${esc(r)}</li>`).join('')}</ul>`;
+    const grupos = GRUPOS_TREINO.map(([nome, f]) => `<div class="card-box tr-box"><div class="cb-head"><h3>${esc(nome)}</h3></div><div class="tr-itens">${b.itens.filter(f).map((i) => `<details class="tr-item"><summary>${esc(i.tema)}${i.pendente ? ' <span class="tag">a confirmar</span>' : ''}</summary><p>${esc(i.texto)}</p>${i.pendente ? `<p class="tr-pend">${esc(i.pendente)}</p>` : ''}</details>`).join('')}</div></div>`).join('');
+    el.innerHTML = `<div class="vh"><div><h1 id="t-treino">Treinamento da Maria</h1><p>O que o robô sabe e como ele atende. Vem dos documentos da clínica (base de ${esc(b.versao)}).</p></div></div>
+      <div class="tr-grid">
+        <div class="card-box tr-box"><div class="cb-head"><h3>Tabela de preços</h3><span class="cb-sub">Sobradinho-DF</span></div><div class="tr-in">${precos}${regras}</div></div>
+        <div class="card-box tr-box"><div class="cb-head"><h3>Convênios</h3><span class="cb-sub">${b.convenios.length} planos · AMHP e ASMEPRO</span></div><div class="tr-in"><p class="tr-nota">${esc(b.regra_convenio)}</p>
+          <label class="search"><svg class="ic"><use href="#i-search"/></svg><input class="inp" id="tr-conv-busca" type="search" placeholder="Procurar plano (ex.: GEAP, Saúde Caixa)" aria-label="Procurar convênio"></label>
+          <ul class="tr-conv" id="tr-conv"></ul></div></div>
+        ${grupos}
+      </div>`;
+    const lista = () => {
+      const t = semAc($('tr-conv-busca').value);
+      const f = b.convenios.filter((c) => !t || semAc(c.nome).includes(t));
+      $('tr-conv').innerHTML = f.length ? f.map((c) => `<li><span>${esc(c.nome)}</span><small>${esc(c.rede)}</small></li>`).join('') : '<li class="tr-vazio">Não está na lista: a recepção confirma com o paciente.</li>';
+    };
+    $('tr-conv-busca').addEventListener('input', lista); lista();
+  }
+  const semAc = (x) => String(x || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
 
   /* ---------- polling ---------- */
   function refresh(view, quiet) {
     view = view || S.view;
     if (S.inflight[view]) return Promise.resolve();
     S.inflight[view] = true;
-    const loaders = { dashboard: loadDashboard, agenda: loadAgenda, conversas: loadConversas, funil: loadFunil };
+    const loaders = { dashboard: loadDashboard, agenda: loadAgenda, conversas: loadConversas, funil: loadFunil, treino: loadTreino };
     return loaders[view](!!quiet).then(() => { S.erro[view] = null; setLive(true); }).catch((e) => {
       if (e && e.status === 401) return;
       setLive(false); $('error-msg').textContent = msgErro(e) + ' O painel tenta de novo sozinho.';
@@ -237,7 +275,7 @@
       else if (!quiet) toast(msgErro(e), 'err');
     }).then(() => { S.inflight[view] = false; });
   }
-  const viewHasData = (v) => ({ dashboard: S.resumo, agenda: S.agenda.data, conversas: S.conversas, funil: S.leads }[v]);
+  const viewHasData = (v) => ({ dashboard: S.resumo, agenda: S.agenda.data, conversas: S.conversas, funil: S.leads, treino: S.base }[v]);
   function poll() {
     if (!S.started || document.hidden) return;
     S.tick++;
@@ -1621,6 +1659,7 @@
     return {
       midia: (arq) => new Promise((res, rej) => setTimeout(() => { if (/offline/i.test(arq)) rej(new Error('offline')); else midiaDemo(arq).then(res, rej); }, 250)),
       handle(method, path, body) {
+        if (path === '/api/base') return Promise.all(['conhecimento', 'convenios', 'precos'].map((f) => fetch('/robo/base/' + f + '.json').then((x) => x.json()))).then(([k, c, pr]) => ({ versao: k.versao, itens: k.itens, convenios: c.convenios, regra_convenio: c.regra, precos: pr }));
         if (!db) { db = seed(); setTimeout(() => { const l = db.leads.find((x) => x.nome === 'Helena Simulada'); if (l) { l.precisa_humano = true; l.atualizado_em = iso(0); } }, 25000); /* demonstra o alerta de humano */ }
         return new Promise((res, rej) => setTimeout(() => { try { res(JSON.parse(JSON.stringify(route(method, path, body || {})))); } catch (e) { rej(e); } }, 140));
       }

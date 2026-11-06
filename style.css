@@ -61,8 +61,9 @@ button{cursor:pointer}
 .top{position:sticky;top:0;z-index:30;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px;padding:calc(8px + var(--sat-top)) 16px 8px}
 .top-logo{height:34px;width:auto;margin-right:auto}
 .main{padding:20px 16px calc(92px + var(--sat-bottom));min-width:0}
-.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:40;background:#fff;border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(4,1fr);padding:6px 6px calc(6px + var(--sat-bottom))}
-.tab{position:relative;display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 4px;border:0;background:none;border-radius:12px;color:var(--gray);font-size:11.5px;font-weight:700}
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:40;background:#fff;border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(5,minmax(0,1fr));padding:6px 6px calc(6px + var(--sat-bottom))}
+.tab{position:relative;display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 4px;border:0;background:none;border-radius:12px;color:var(--gray);font-size:11px;font-weight:700;min-width:0}
+.tab span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .tab .ic{width:23px;height:23px}
 .tab[aria-current=page]{color:var(--red);background:var(--red-tint)}
 .nbadge{position:absolute;top:2px;left:calc(50% + 6px);min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:var(--red);color:#fff;font-size:11px;font-weight:800;display:grid;place-items:center;line-height:1;border:2px solid #fff}
@@ -646,3 +647,25 @@ textarea.inpp{padding:11px 13px;min-height:84px;resize:vertical}
 .lightbox img{min-width:min(320px,90%);min-height:200px;background:#fff}
 
 .fonte-sigma .demo-note,.fonte-sigma .demo-strip{display:none!important}
+
+/* Treinamento da Maria */
+.tr-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:16px;align-items:start}
+.tr-in{padding:12px 18px 18px}
+.tr-g{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--gray);margin:14px 0 6px}
+.tr-g:first-child{margin-top:0}
+.tr-tab{width:100%;border-collapse:collapse;font-size:14px}
+.tr-tab th{text-align:left;font-size:11.5px;color:var(--gray);font-weight:700;padding:4px 6px;border-bottom:1px solid var(--line)}
+.tr-tab td{padding:7px 6px;border-bottom:1px solid var(--line)}
+.tr-tab td+td,.tr-tab th+th{text-align:right;white-space:nowrap}
+.tr-regras{margin:14px 0 0;padding-left:18px;font-size:13.5px;line-height:1.45;display:grid;gap:4px}
+.tr-nota{font-size:13.5px;color:var(--text-2);margin-bottom:10px}
+.tr-conv{list-style:none;margin:10px 0 0;padding:0;max-height:320px;overflow:auto;font-size:14px}
+.tr-conv li{display:flex;justify-content:space-between;gap:10px;padding:7px 2px;border-bottom:1px solid var(--line)}
+.tr-conv small{color:var(--gray);white-space:nowrap}
+.tr-vazio{color:var(--gray)}
+.tr-itens{padding:8px 18px 14px}
+.tr-item{border-bottom:1px solid var(--line);padding:10px 0}
+.tr-item:last-child{border-bottom:0}
+.tr-item summary{cursor:pointer;font-weight:700;font-size:14.5px}
+.tr-item p{font-size:14px;line-height:1.5;color:var(--text-2);margin-top:6px}
+.tr-pend{color:var(--gray)!important;font-size:13px!important}
