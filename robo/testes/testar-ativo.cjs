@@ -4,10 +4,10 @@ let falhas = 0;
 const ok = (c, m) => { if (!c) { falhas++; console.log('FALHOU:', m); } };
 const conf = a.montar('confirmacao', { nome: 'MARIA DA SILVA', profissional: 'Dr. Thiago', data: '2026-11-16', hora: '08:30', hoje: '2026-11-15' }, 0);
 console.log(conf, '\n---');
-ok(conf.includes('Oi, Maria!') && conf.includes('amanhã (segunda, 16/11)') && !conf.includes('SAIR'), 'confirmação');
+ok(/(Bom dia|Boa tarde|Boa noite), Maria!/.test(conf) && conf.includes('amanhã (segunda, 16/11)') && !conf.includes('SAIR'), 'confirmação');
 const fu = a.montar('followup', { nome: 'joão', assunto: 'o seu check-up' }, 0.9);
 console.log(fu, '\n---');
-ok(fu.includes('SAIR'), 'follow-up com SAIR');
+ok(fu.includes('SAIR') && /, João!/.test(fu), 'follow-up com SAIR');
 const R = { '1': 'confirmar', 'Sim, confirmo': 'confirmar', 'confirmado!': 'confirmar', '2': 'remarcar', 'preciso remarcar': 'remarcar',
   'dá pra mudar o horário?': 'remarcar', '3': 'cancelar', 'não vou poder ir': 'cancelar', 'SAIR': 'sair', 'quanto custa o exame?': 'conversa' };
 for (const [t, e] of Object.entries(R)) ok(a.lerResposta(t) === e, `resposta "${t}" → ${a.lerResposta(t)} (esperado ${e})`);

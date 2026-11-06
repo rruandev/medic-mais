@@ -21,4 +21,10 @@ const at = montarContexto({ agora, mensagens: [{ direcao: 'in', texto: '1', cria
 ok(at.contexto.includes('a clínica mandou a primeira mensagem (confirmacao) hoje'), 'início por mensagem ativa');
 const mesmo = montarContexto({ agora, mensagens: [{ direcao: 'in', texto: 'oi', criado_em: '2026-11-06T09:00:00Z' }, { direcao: 'out', texto: 'olá', criado_em: '2026-11-06T09:01:00Z' }, { direcao: 'in', texto: 'e o preço?', criado_em: '2026-11-06T13:29:00Z' }] });
 ok(mesmo.historico.length === 3, 'mesmo dia (4h de pausa) continua o mesmo atendimento');
+const { saudacao } = require('../contexto.cjs');
+// terça à tarde → sexta à noite
+const sexNoite = montarContexto({ agora: new Date('2026-11-06T23:10:00Z'), lead: { nome: 'Ana Souza' }, mensagens: [{ direcao: 'in', texto: 'oi', criado_em: '2026-11-03T17:00:00Z' }, { direcao: 'in', texto: 'tenho uma dúvida', criado_em: '2026-11-06T23:09:00Z' }] });
+console.log(sexNoite.contexto);
+ok(sexNoite.contexto.includes('sexta-feira') && sexNoite.contexto.includes('"Boa noite, Ana! Tudo bem? Aqui é a Maria, do atendimento') && sexNoite.contexto.includes('há 3 dias (terça-feira)'), 'sexta à noite depois de terça à tarde');
+ok(saudacao(new Date('2026-11-06T11:00:00Z')) === 'Bom dia' && saudacao(new Date('2026-11-06T16:00:00Z')) === 'Boa tarde' && saudacao(new Date('2026-11-07T02:00:00Z')) === 'Boa noite', 'saudações');
 console.log(f ? f + ' falha(s)' : 'contexto: tudo certo'); process.exitCode = f ? 1 : 0;

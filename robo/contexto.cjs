@@ -12,6 +12,11 @@ const MESES = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julh
 const br = (d) => new Date(new Date(d).getTime() - 3 * 3600e3);
 const ymd = (d) => br(d).toISOString().slice(0, 10);
 
+function saudacao(agora) {
+  const h = br(agora).getUTCHours();
+  return h >= 5 && h < 12 ? 'Bom dia' : h >= 12 && h < 18 ? 'Boa tarde' : 'Boa noite';
+}
+
 function agoraPorExtenso(agora) {
   const b = br(agora);
   const h = b.getUTCHours();
@@ -48,7 +53,8 @@ function separarAtendimento(mensagens, agora, pausaH = PAUSA_NOVO_ATENDIMENTO_H)
 // envioAtivo: se a conversa atual começou por mensagem nossa (confirmação, follow-up), a linha de envios_ativos.
 function montarContexto({ agora = new Date(), mensagens = [], lead = {}, envioAtivo = null, agendamentos = [] }) {
   const { atual, antigas } = separarAtendimento(mensagens, agora);
-  const linhas = [`HOJE: ${agoraPorExtenso(agora)}. Use isso para "amanhã", "sexta", "semana que vem".`];
+  const linhas = [`HOJE: ${agoraPorExtenso(agora)}. Use isso para "amanhã", "sexta", "semana que vem".`,
+    `SAUDAÇÃO CERTA AGORA: "${saudacao(agora)}". Em conversa nova, comece com ela (ex.: "${saudacao(agora)}${lead.nome ? ', ' + String(lead.nome).split(' ')[0] : ''}! Tudo bem? Aqui é a Maria, do atendimento da MedicMais 💙"). Não use saudação de outro período.`];
 
   linhas.push(lead.nome ? `PACIENTE: ${lead.nome}${lead.telefone ? ' (' + lead.telefone + ')' : ''}.` : 'PACIENTE: nome ainda não informado.');
 
@@ -83,4 +89,4 @@ function montarContexto({ agora = new Date(), mensagens = [], lead = {}, envioAt
   };
 }
 
-module.exports = { montarContexto, separarAtendimento, agoraPorExtenso, haQuanto, PAUSA_NOVO_ATENDIMENTO_H };
+module.exports = { saudacao, montarContexto, separarAtendimento, agoraPorExtenso, haQuanto, PAUSA_NOVO_ATENDIMENTO_H };

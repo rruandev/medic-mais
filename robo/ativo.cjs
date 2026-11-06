@@ -3,34 +3,36 @@
 
 const DIAS = ['domingo', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado'];
 const primeiroNome = (n) => { const p = String(n || '').trim().split(/\s+/)[0] || ''; return p ? p[0].toUpperCase() + p.slice(1).toLowerCase() : ''; };
-const ola = (n) => (primeiroNome(n) ? `Oi, ${primeiroNome(n)}!` : 'Oi!');
+// Saudação pelo horário de Brasília na hora do envio (bom dia / boa tarde / boa noite).
+const saud = () => { const h = new Date(Date.now() - 3 * 3600e3).getUTCHours(); return h >= 5 && h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite'; };
+const ola = (n) => (primeiroNome(n) ? `${saud()}, ${primeiroNome(n)}!` : `${saud()}!`);
 const dataBR = (iso) => { const [a, m, d] = iso.split('-'); return `${d}/${m}`; };
 const diaSemana = (iso) => DIAS[new Date(iso + 'T12:00:00-03:00').getUTCDay()];
 
 // Variações de texto: cada envio sorteia uma (mensagem idêntica em massa aumenta risco de bloqueio).
 const TEXTOS = {
   confirmacao: [
-    (c) => `${ola(c.nome)} Aqui é a Maria, da MedicMais Sobradinho 💙\nPassando para confirmar sua consulta com ${c.profissional} ${c.quando}, às ${c.hora}.\n\nResponda:\n1 - Confirmo\n2 - Preciso remarcar\n3 - Não vou poder ir`,
-    (c) => `${ola(c.nome)} É a Maria, da MedicMais Sobradinho 💙\nSua consulta com ${c.profissional} está marcada para ${c.quando}, às ${c.hora}. Posso confirmar?\n\n1 - Sim, confirmo\n2 - Quero remarcar\n3 - Não poderei ir`,
+    (c) => `${ola(c.nome)} Aqui é a Maria, do atendimento da MedicMais Sobradinho 💙\nPassando para confirmar sua consulta com ${c.profissional} ${c.quando}, às ${c.hora}.\n\nResponda:\n1 - Confirmo\n2 - Preciso remarcar\n3 - Não vou poder ir`,
+    (c) => `${ola(c.nome)} É a Maria, do atendimento da MedicMais Sobradinho 💙\nSua consulta com ${c.profissional} está marcada para ${c.quando}, às ${c.hora}. Posso confirmar?\n\n1 - Sim, confirmo\n2 - Quero remarcar\n3 - Não poderei ir`,
   ],
   lembrete_dia: [
     (c) => `${ola(c.nome)} Te esperamos hoje às ${c.hora} com ${c.profissional} na MedicMais Sobradinho 💙 Se puder, chegue 10 minutinhos antes.`,
   ],
   falta: [
-    (c) => `${ola(c.nome)} Aqui é a Maria, da MedicMais. Sentimos sua falta na consulta de ontem com ${c.profissional}. Está tudo bem? Quer que eu veja um novo horário pra você?`,
+    (c) => `${ola(c.nome)} Aqui é a Maria, do atendimento da MedicMais. Sentimos sua falta na consulta de ontem com ${c.profissional}. Está tudo bem? Quer que eu veja um novo horário pra você?`,
   ],
   followup: [ // conversa parou sem agendar (24 h depois)
-    (c) => `${ola(c.nome)} Aqui é a Maria, da MedicMais 💙 Ficou alguma dúvida sobre ${c.assunto || 'o atendimento'}? Se quiser, já vejo um horário pra você.`,
+    (c) => `${ola(c.nome)} Aqui é a Maria, do atendimento da MedicMais 💙 Ficou alguma dúvida sobre ${c.assunto || 'o atendimento'}? Se quiser, já vejo um horário pra você.`,
     (c) => `${ola(c.nome)} Passando para saber se consigo te ajudar com ${c.assunto || 'o seu atendimento'}. Tenho horários essa semana, prefere manhã ou tarde?`,
   ],
   followup_2: [ // 2ª e última tentativa (72 h depois)
     (c) => `${ola(c.nome)} Não quero te incomodar, é só para não deixar você sem resposta. Quando quiser cuidar ${c.assunto ? 'do(a) ' + c.assunto : 'disso'}, é só me chamar aqui 💙`,
   ],
   pediu_para_chamar: [ // "me chama sexta"
-    (c) => `${ola(c.nome)} Combinamos de conversar hoje 😊 Aqui é a Maria, da MedicMais. Vamos ver aquele horário ${c.assunto ? 'para ' + c.assunto : ''}? Prefere manhã ou tarde?`,
+    (c) => `${ola(c.nome)} Combinamos de conversar hoje 😊 Aqui é a Maria, do atendimento da MedicMais. Vamos ver aquele horário ${c.assunto ? 'para ' + c.assunto : ''}? Prefere manhã ou tarde?`,
   ],
   exames: [ // consulta feita, exames pedidos e não feitos (2 dias depois)
-    (c) => `${ola(c.nome)} Aqui é a Maria, da MedicMais 💙 Vi que o(a) ${c.profissional} pediu alguns exames. Quer que eu já deixe sua coleta agendada? A análise é da DASA e a nossa enfermeira tem a mão leve 😉`,
+    (c) => `${ola(c.nome)} Aqui é a Maria, do atendimento da MedicMais 💙 Vi que o(a) ${c.profissional} pediu alguns exames. Quer que eu já deixe sua coleta agendada? A análise é da DASA e a nossa enfermeira tem a mão leve 😉`,
   ],
   retorno: [
     (c) => `${ola(c.nome)} Seus exames já ficaram prontos? Lembrando que você pode voltar para mostrar os resultados ao médico. Quer que eu reserve seu retorno?`,
