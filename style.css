@@ -327,6 +327,7 @@ textarea.inpp{padding:11px 13px;min-height:84px;resize:vertical}
 .conv-t{display:block;font-size:13px;color:var(--text-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:1px}
 .conv-b{display:flex;gap:6px;margin-top:4px;flex-wrap:wrap}
 .tag{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:800;border-radius:6px;padding:1px 7px;background:var(--soft-2);color:var(--text-2)}
+.tag.ok{background:#e4f3ea;color:#1f6b3f}
 .tag.hum{background:var(--red);color:#fff}
 .tag.hum::before{content:"";width:6px;height:6px;border-radius:50%;background:#fff;animation:pulse2 1.4s infinite}
 @keyframes pulse2{50%{opacity:.3}}

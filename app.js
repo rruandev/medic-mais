@@ -82,7 +82,7 @@
     if (d.length <= 10) return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`;
     return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
   };
-  const ORIGEM = { paciente: 'Paciente', ia: 'Maria · IA', recepcao: 'Recepção · humano' };
+  const ORIGEM = { paciente: 'Paciente', ia: 'Fátima · IA', recepcao: 'Recepção · humano' };
   const origemDe = (m) => (m.direcao === 'in' ? 'paciente' : (ORIGEM[m.origem] && m.origem !== 'paciente' ? m.origem : 'ia'));
   function midia(texto) {
     const t = String(texto || '');
@@ -227,7 +227,7 @@
   }
 
   /* =====================================================================
-     TREINAMENTO: o que a Maria sabe (preços, pagamento, convênios, como vende).
+     TREINAMENTO: o que a Fátima sabe (preços, pagamento, convênios, como vende).
      Mesma base que o robô usa (robo/base/*.json). Só leitura.
      ===================================================================== */
   function loadTreino() {
@@ -275,9 +275,9 @@
     const outros = b.itens.filter((i) => !usados.has(i.id));
     if (outros.length) grupos.push(['Outros assuntos', outros]);
     const textos = b.textos_ativos ? Object.entries(b.textos_ativos.tipos).map(([k, t]) => `<details class="tr-item"><summary>${esc(t.nome)}</summary>${t.textos.map((x) => `<p class="tr-msg">${esc(x)}</p>`).join('')}</details>`).join('') : '';
-    el.innerHTML = `<div class="vh"><div><h1 id="t-treino">Treinamento da Maria</h1><p>O que o robô sabe e como ele atende. Tudo aqui é editável: o que você salvar vale já na próxima mensagem do paciente.${b.atualizado_em ? ' Última alteração: ' + esc(ago(b.atualizado_em)) + '.' : ''}</p></div></div>
+    el.innerHTML = `<div class="vh"><div><h1 id="t-treino">Treinamento da Fátima</h1><p>O que o robô sabe e como ele atende. Tudo aqui é editável: o que você salvar vale já na próxima mensagem do paciente.${b.atualizado_em ? ' Última alteração: ' + esc(ago(b.atualizado_em)) + '.' : ''}</p></div></div>
       <div class="tr-grid">
-        <div class="card-box tr-box"><div class="cb-head"><h3>Mensagens automáticas</h3><span class="cb-sub">a Maria chama o paciente</span></div><div class="tr-in" id="tr-ativos"><div class="sk sk-row"></div></div>
+        <div class="card-box tr-box"><div class="cb-head"><h3>Mensagens automáticas</h3><span class="cb-sub">a Fátima chama o paciente</span></div><div class="tr-in" id="tr-ativos"><div class="sk sk-row"></div></div>
           ${textos ? `<div class="tr-itens"><div class="tr-sub"><h4 class="tr-g">Textos</h4>${edBtn('textos', 'Editar textos')}</div>${textos}</div>` : ''}</div>
         <div class="card-box tr-box"><div class="cb-head"><h3>Tabela de preços</h3>${edBtn('precos')}</div><div class="tr-in">${precos}${regras}</div></div>
         <div class="card-box tr-box"><div class="cb-head"><h3>Convênios</h3>${edBtn('convenios')}</div><div class="tr-in"><p class="tr-nota">${b.convenios.length} planos. ${esc(b.regra_convenio)}</p>
@@ -295,7 +295,7 @@
     if (S.ativos) renderAtivos(); loadAtivos();
   }
 
-  /* ---------- documentos originais (guia da Maria) ---------- */
+  /* ---------- documentos originais (guia da Fátima) ---------- */
   const FONTES_DOC = { apostila: 'Apostila de treinamento geral', fechamento: 'Script: o fechamento', exames: 'Como vender mais exames', tabela: 'Tabela de preços', convenios: 'Convênios AMHP e ASMEPRO' };
   const kb = (n) => n > 1048576 ? (n / 1048576).toFixed(1).replace('.', ',') + ' MB' : Math.max(1, Math.round(n / 1024)) + ' KB';
   function caixaDocs(b) {
@@ -305,12 +305,12 @@
       const ds = docs.filter((d) => d.fonte === f), us = usados(f);
       return `<li class="tdoc"><div class="tdoc-h"><b>${esc(nome)}</b>${ds.length ? '<span class="tag ok">guardado</span>' : '<span class="tag">falta enviar</span>'}</div>
         ${ds.map((d) => `<button type="button" class="tdoc-a" data-doc="${d.id}">${icon('i-book')}${esc(d.nome)} <small>${kb(d.tamanho)} · ${esc(ago(d.enviado_em))}</small></button>`).join('')}
-        <small class="tdoc-u">A Maria usa ${us.length} ${us.length === 1 ? 'assunto' : 'assuntos'} deste documento${us.length ? ': ' + us.slice(0, 4).map((i) => esc(i.tema)).join(', ') + (us.length > 4 ? '…' : '') : ''}.</small>
+        <small class="tdoc-u">A Fátima usa ${us.length} ${us.length === 1 ? 'assunto' : 'assuntos'} deste documento${us.length ? ': ' + us.slice(0, 4).map((i) => esc(i.tema)).join(', ') + (us.length > 4 ? '…' : '') : ''}.</small>
         <label class="btn btn-ghost btn-sm tdoc-up">${icon('i-plus')}${ds.length ? 'Enviar versão nova' : 'Enviar arquivo'}<input type="file" hidden data-tdoc-up="${f}" accept=".pdf,.doc,.docx,.xls,.xlsx,.txt,.md,image/*"></label></li>`;
     }).join('');
     const extras = docs.filter((d) => !FONTES_DOC[d.fonte]);
-    return `<div class="card-box tr-box"><div class="cb-head"><h3>Documentos da clínica</h3><span class="cb-sub">guia da Maria</span></div><div class="tr-in">
-      <p class="tr-nota">Os originais que ensinam a Maria. Ficam guardados no banco do painel e nunca são apagados: uma versão nova entra ao lado da antiga.</p>
+    return `<div class="card-box tr-box"><div class="cb-head"><h3>Documentos da clínica</h3><span class="cb-sub">guia da Fátima</span></div><div class="tr-in">
+      <p class="tr-nota">Os originais que ensinam a Fátima. Ficam guardados no banco do painel e nunca são apagados: uma versão nova entra ao lado da antiga.</p>
       <ul class="tdocs">${linhas}${extras.map((d) => `<li class="tdoc"><button type="button" class="tdoc-a" data-doc="${d.id}">${icon('i-book')}${esc(d.nome)} <small>${kb(d.tamanho)} · ${esc(ago(d.enviado_em))}</small></button>${d.descricao ? `<small class="tdoc-u">${esc(d.descricao)}</small>` : ''}</li>`).join('')}</ul>
       <label class="btn btn-ghost btn-sm tdoc-up">${icon('i-plus')}Outro documento<input type="file" hidden data-tdoc-up="outro" accept=".pdf,.doc,.docx,.xls,.xlsx,.txt,.md,image/*"></label></div></div>`;
   }
@@ -338,7 +338,7 @@
   async function salvaBase(form, chave, dados) {
     const err = form.querySelector('.err-inline'), btn = form.querySelector('[type=submit]');
     err.hidden = true; btn.disabled = true; btn.innerHTML = '<span class="spin"></span> Salvando...';
-    try { S.base = await api('PUT', '/api/base', { chave, dados }); closeModal(); renderTreino(); toast('Salvo. A Maria já usa a versão nova.'); }
+    try { S.base = await api('PUT', '/api/base', { chave, dados }); closeModal(); renderTreino(); toast('Salvo. A Fátima já usa a versão nova.'); }
     catch (e) { btn.disabled = false; btn.textContent = 'Salvar'; if (e.status !== 401) { err.textContent = msgErro(e); err.hidden = false; } }
   }
   const slug = (t) => semAc(t).replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60) || 'item';
@@ -346,16 +346,16 @@
     const it = id === 'novo' ? null : S.base.itens.find((i) => i.id === id);
     openModal(it ? 'Editar assunto' : 'Novo assunto', `<form data-tr-form="item" novalidate>
       <div class="field"><label for="ti-t">Assunto</label><input class="inp" id="ti-t" name="tema" maxlength="200" value="${esc(it ? it.tema : '')}" placeholder="Ex.: Objeção: vou pensar"></div>
-      <div class="field"><label for="ti-g">Palavras que o paciente usa</label><input class="inp" id="ti-g" name="gatilhos" maxlength="600" value="${esc(it ? it.gatilhos || '' : '')}" placeholder="Ex.: vou pensar depois te falo vou ver"><p class="hint">A Maria acha este assunto quando a mensagem tem essas palavras.</p></div>
-      <div class="field"><label for="ti-x">O que a Maria deve saber ou responder</label><textarea class="inp" id="ti-x" name="texto" rows="8" maxlength="4000">${esc(it ? it.texto : '')}</textarea></div>
-      <div class="field"><label for="ti-p">Falta confirmar algo? (opcional)</label><input class="inp" id="ti-p" name="pendente" maxlength="400" value="${esc(it ? it.pendente || '' : '')}" placeholder="Deixe vazio se está tudo certo"><p class="hint">Enquanto tiver texto aqui, a Maria não afirma esse ponto e chama a equipe.</p></div>
+      <div class="field"><label for="ti-g">Palavras que o paciente usa</label><input class="inp" id="ti-g" name="gatilhos" maxlength="600" value="${esc(it ? it.gatilhos || '' : '')}" placeholder="Ex.: vou pensar depois te falo vou ver"><p class="hint">A Fátima acha este assunto quando a mensagem tem essas palavras.</p></div>
+      <div class="field"><label for="ti-x">O que a Fátima deve saber ou responder</label><textarea class="inp" id="ti-x" name="texto" rows="8" maxlength="4000">${esc(it ? it.texto : '')}</textarea></div>
+      <div class="field"><label for="ti-p">Falta confirmar algo? (opcional)</label><input class="inp" id="ti-p" name="pendente" maxlength="400" value="${esc(it ? it.pendente || '' : '')}" placeholder="Deixe vazio se está tudo certo"><p class="hint">Enquanto tiver texto aqui, a Fátima não afirma esse ponto e chama a equipe.</p></div>
       ${acoes(!!it)}</form>`, { wide: true });
     const f = $('modal-body').querySelector('form');
     f.onsubmit = (e) => {
       e.preventDefault();
       const v = { tema: f.tema.value.trim(), gatilhos: f.gatilhos.value.trim(), texto: f.texto.value.trim(), pendente: f.pendente.value.trim() };
       const err = f.querySelector('.err-inline');
-      if (!v.tema || !v.texto) { err.textContent = 'Preencha o assunto e o que a Maria deve responder.'; err.hidden = false; return; }
+      if (!v.tema || !v.texto) { err.textContent = 'Preencha o assunto e o que a Fátima deve responder.'; err.hidden = false; return; }
       const itens = S.base.itens.map((i) => ({ ...i }));
       const novo = { ...(it || {}), ...v }; if (!novo.pendente) delete novo.pendente;
       if (it) itens[itens.findIndex((i) => i.id === it.id)] = novo;
@@ -391,7 +391,7 @@
     const b = S.base;
     openModal('Editar convênios', `<form data-tr-form="convenios" novalidate>
       <div class="field"><label for="tc-r">Regra geral</label><textarea class="inp" id="tc-r" name="regra" rows="3" maxlength="1000">${esc(b.regra_convenio || '')}</textarea></div>
-      <div class="field"><label for="tc-l">Planos aceitos (um por linha: nome | rede)</label><textarea class="inp" id="tc-l" name="lista" rows="14">${esc(b.convenios.map((c) => c.nome + (c.rede ? ' | ' + c.rede : '')).join('\n'))}</textarea><p class="hint">A Maria só confirma o plano que estiver nesta lista. Fora dela, ela chama a equipe.</p></div>
+      <div class="field"><label for="tc-l">Planos aceitos (um por linha: nome | rede)</label><textarea class="inp" id="tc-l" name="lista" rows="14">${esc(b.convenios.map((c) => c.nome + (c.rede ? ' | ' + c.rede : '')).join('\n'))}</textarea><p class="hint">A Fátima só confirma o plano que estiver nesta lista. Fora dela, ela chama a equipe.</p></div>
       ${acoes(false)}</form>`, { wide: true });
     const f = $('modal-body').querySelector('form');
     f.onsubmit = (e) => {
@@ -1244,7 +1244,7 @@
     box.innerHTML = lista.map((c) => {
       const hoje = nowSP().d, dia = c.ultima_em ? daySP(c.ultima_em) : '';
       const quando = !c.ultima_em ? '' : dia === hoje ? timeSP(c.ultima_em) : dia === addDays(hoje, -1) ? 'ontem' : fmtDM(dia);
-      return `<button type="button" class="conv${c.telefone === S.chat.tel ? ' sel' : ''}${c.precisa_humano ? ' hum' : ''}" data-open-chat="${esc(c.telefone)}"><span class="av${c.precisa_humano ? ' hum' : ''}">${esc(initials(nomeOuFone(c.nome, c.telefone)))}</span><span class="conv-m"><span class="conv-n"><b>${esc(nomeOuFone(c.nome, c.telefone))}</b><time>${esc(quando)}</time></span><span class="conv-t">${c.ultima_direcao === 'out' ? (c.ultima_origem === 'recepcao' ? 'Recepção: ' : 'Maria: ') : ''}${esc(previa(c.ultima_texto, c.ultima_midia_tipo) || '(sem texto)')}</span><span class="conv-b">${c.precisa_humano ? '<span class="tag hum">Pediu humano</span>' : ''}${c.etapa ? `<span class="tag">${esc(ETAPA_NOME[c.etapa] || c.etapa)}</span>` : ''}</span></span></button>`;
+      return `<button type="button" class="conv${c.telefone === S.chat.tel ? ' sel' : ''}${c.precisa_humano ? ' hum' : ''}" data-open-chat="${esc(c.telefone)}"><span class="av${c.precisa_humano ? ' hum' : ''}">${esc(initials(nomeOuFone(c.nome, c.telefone)))}</span><span class="conv-m"><span class="conv-n"><b>${esc(nomeOuFone(c.nome, c.telefone))}</b><time>${esc(quando)}</time></span><span class="conv-t">${c.ultima_direcao === 'out' ? (c.ultima_origem === 'recepcao' ? 'Recepção: ' : 'Fátima: ') : ''}${esc(previa(c.ultima_texto, c.ultima_midia_tipo) || '(sem texto)')}</span><span class="conv-b">${c.precisa_humano ? '<span class="tag hum">Pediu humano</span>' : ''}${c.etapa ? `<span class="tag">${esc(ETAPA_NOME[c.etapa] || c.etapa)}</span>` : ''}</span></span></button>`;
     }).join('');
     box.scrollTop = scroll;
   }
@@ -1313,7 +1313,7 @@
     const tel = S.chat.tel; if (!tel) return;
     const lead = S.chat.lead || (S.conversas || []).find((c) => c.telefone === tel) || {};
     const nome = nomeOuFone(lead.nome, tel);
-    const head = `<button class="icon-btn back" type="button" data-chat-back="1" aria-label="Voltar para a lista">${icon('i-left')}</button><span class="av${lead.precisa_humano ? ' hum' : ''}">${esc(initials(nome))}</span><div class="cp-who"><b>${esc(nome)}</b><small>${esc(fmtPhone(tel))}${lead.etapa ? ' · ' + esc(ETAPA_NOME[lead.etapa] || lead.etapa) : ''}${lead.interesse ? ' · ' + esc(lead.interesse) : ''}</small></div><div class="cp-actions">${lead.precisa_humano ? `<span class="tag hum" title="${esc(lead.motivo_humano || '')}">Pediu humano</span><button class="btn btn-primary btn-sm" type="button" data-resolver="${lead.id || lead.lead_id}">${icon('i-check')}Resolvido</button>` : ''}<button class="btn btn-ghost btn-sm" type="button" data-newappt="1" data-lead-tel="${esc(tel)}">${icon('i-cal')}Agendar</button></div>`;
+    const head = `<button class="icon-btn back" type="button" data-chat-back="1" aria-label="Voltar para a lista">${icon('i-left')}</button><span class="av${lead.precisa_humano ? ' hum' : ''}">${esc(initials(nome))}</span><div class="cp-who"><b>${esc(nome)}</b><small>${esc(fmtPhone(tel))}${lead.etapa ? ' · ' + esc(ETAPA_NOME[lead.etapa] || lead.etapa) : ''}${lead.interesse ? ' · ' + esc(lead.interesse) : ''}</small></div><div class="cp-actions">${lead.robo_pausado ? `<span class="tag">Você assumiu</span><button class="btn btn-primary btn-sm" type="button" data-robo-pausa="0" data-lead-id="${lead.id || lead.lead_id}">${icon('i-check')}Devolver ao robô</button>` : `<span class="tag ok">Robô respondendo</span><button class="btn btn-ghost btn-sm" type="button" data-robo-pausa="1" data-lead-id="${lead.id || lead.lead_id}">Assumir conversa</button>`}${lead.precisa_humano ? `<span class="tag hum" title="${esc(lead.motivo_humano || '')}">Pediu humano</span><button class="btn btn-primary btn-sm" type="button" data-resolver="${lead.id || lead.lead_id}">${icon('i-check')}Resolvido</button>` : ''}<button class="btn btn-ghost btn-sm" type="button" data-newappt="1" data-lead-tel="${esc(tel)}">${icon('i-cal')}Agendar</button></div>`;
     if (S.sig.head !== head) { S.sig.head = head; $('cp-head').innerHTML = head; }
     const msgs = S.chat.mensagens || [];
     const pend = S.chat.pend.filter((p) => !msgs.some((m) => m.direcao === 'out' && m.texto === p.texto && new Date(m.criado_em).getTime() >= p.t - 5000) && Date.now() - p.t < 25000 || p.falhou);
@@ -1374,6 +1374,17 @@
     $('cv-send').disabled = false;
     ta.focus();
   }
+  async function roboPausa(leadId, pausar, btn) {
+    if (!leadId || leadId === 'undefined') { toast('Esse contato ainda não tem cadastro. Aguarde a próxima mensagem.', 'err'); return; }
+    if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spin"></span> Salvando...'; }
+    try {
+      const r = await api('PATCH', `/api/leads?id=${leadId}`, { robo_pausado: pausar });
+      if (S.chat.lead) S.chat.lead.robo_pausado = r.lead.robo_pausado;
+      toast(pausar ? 'Você assumiu. A Fátima não responde mais este paciente.' : 'Devolvido. A Fátima volta a responder este paciente.');
+      S.sig = {}; S.chat.sig = '';
+      afterChange();
+    } catch (e) { toast(msgErro(e), 'err'); if (btn) btn.disabled = false; }
+  }
   async function resolverHumano(leadId, btn) {
     if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spin"></span> Salvando...'; }
     try {
@@ -1388,13 +1399,13 @@
      FUNIL
      ===================================================================== */
   /* =====================================================================
-     FUNIL (kanban) + CONTEXTO DA IA (regras que a Maria lê a cada mensagem)
+     FUNIL (kanban) + CONTEXTO DA IA (regras que a Fátima lê a cada mensagem)
      ===================================================================== */
   const CAT_NOME = { triagem: 'Triagem', atendimento: 'Atendimento', regras: 'Regras', informacoes: 'Informações da clínica', geral: 'Geral' };
-  const MSG_SALVO = 'Salvo — a Maria já usa na próxima mensagem';
+  const MSG_SALVO = 'Salvo — a Fátima já usa na próxima mensagem';
   const DICAS = {
-    novo_contato: 'Muita gente para aqui: revise a abordagem inicial e a triagem para a Maria qualificar mais rápido.',
-    qualificado: 'O paciente foi entendido, mas não recebeu horário: reforce nas regras que a Maria deve oferecer datas logo após a triagem.',
+    novo_contato: 'Muita gente para aqui: revise a abordagem inicial e a triagem para a Fátima qualificar mais rápido.',
+    qualificado: 'O paciente foi entendido, mas não recebeu horário: reforce nas regras que a Fátima deve oferecer datas logo após a triagem.',
     horario_oferecido: 'Receberam horário e não confirmaram: teste oferecer duas opções de horário e um lembrete cordial nas regras.',
     agendado: 'Agendados sem confirmação de presença: vale pedir a confirmação um dia antes.'
   };
@@ -1423,7 +1434,7 @@
   }
   function funilHead() {
     const t = S.funilTab;
-    return `<div class="vh"><div><h1 id="t-funil">Funil de atendimento</h1><p>${t === 'funil' ? 'Em que ponto da conversa cada pessoa está. Arraste os cartões ou use o seletor para mudar a etapa.' : 'Ensine a Maria: o que ela deve saber e como deve atender.'}</p></div>
+    return `<div class="vh"><div><h1 id="t-funil">Funil de atendimento</h1><p>${t === 'funil' ? 'Em que ponto da conversa cada pessoa está. Arraste os cartões ou use o seletor para mudar a etapa.' : 'Ensine a Fátima: o que ela deve saber e como deve atender.'}</p></div>
       <div class="vh-actions"><div class="seg" role="group" aria-label="Seção"><button type="button" data-funil-tab="funil" aria-pressed="${t === 'funil'}">Funil</button><button type="button" data-funil-tab="contexto" aria-pressed="${t === 'contexto'}">Contexto da IA</button></div></div></div>`;
   }
   function renderFunil() {
@@ -1472,8 +1483,8 @@
     return `<form class="rule edit" data-rule-form="${novo ? 'novo' : r.id}" novalidate>
       <div class="field"><label for="rf-t">Título da regra</label><input class="inp" id="rf-t" name="titulo" maxlength="120" value="${esc(r ? r.titulo : '')}" placeholder="Ex.: Triagem: qual médico para cada sintoma"></div>
       <div class="field"><label for="rf-c">Categoria</label><select class="inp" id="rf-c" name="categoria">${catOpts(r ? r.categoria : 'triagem')}</select></div>
-      <div class="field"><label for="rf-x">O que a Maria deve saber ou fazer</label><textarea class="inp" id="rf-x" name="conteudo" rows="9" maxlength="8000" placeholder="Ex.: Dor na perna, costas ou cabeça → encaminhar para o clínico geral.">${esc(r ? r.conteudo : '')}</textarea><p class="hint">Escreva como se explicasse a uma recepcionista nova. Quanto mais claro, melhor a Maria atende.</p></div>
-      <label class="check"><input type="checkbox" name="ativo"${!r || r.ativo ? ' checked' : ''}><span>Regra ativa<small>Desligada, a Maria ignora este texto.</small></span></label>
+      <div class="field"><label for="rf-x">O que a Fátima deve saber ou fazer</label><textarea class="inp" id="rf-x" name="conteudo" rows="9" maxlength="8000" placeholder="Ex.: Dor na perna, costas ou cabeça → encaminhar para o clínico geral.">${esc(r ? r.conteudo : '')}</textarea><p class="hint">Escreva como se explicasse a uma recepcionista nova. Quanto mais claro, melhor a Fátima atende.</p></div>
+      <label class="check"><input type="checkbox" name="ativo"${!r || r.ativo ? ' checked' : ''}><span>Regra ativa<small>Desligada, a Fátima ignora este texto.</small></span></label>
       <div class="err-inline" role="alert" hidden></div>
       <div class="modal-actions"><button type="button" class="btn btn-ghost" data-rule-cancel="1">Cancelar</button><button class="btn btn-primary" type="submit">Salvar regra</button></div></form>`;
   }
@@ -1485,7 +1496,7 @@
         <label class="tg" title="${r.ativo ? 'Regra ativa' : 'Regra desligada'}"><input type="checkbox" data-rule-toggle="${r.id}"${r.ativo ? ' checked' : ''} aria-label="Regra ativa: ${esc(r.titulo)}"><i></i></label></div>
       <h3>${esc(r.titulo)}</h3>
       <p class="rule-t" data-rule-expand="${r.id}">${esc(r.conteudo)}</p>
-      ${del ? `<div class="rule-del"><span>Excluir esta regra? A Maria deixa de usá-la.</span><button type="button" class="btn btn-ghost btn-sm" data-rule-delno="1">Cancelar</button><button type="button" class="btn btn-danger btn-sm" data-rule-delsim="${r.id}">Excluir</button></div>`
+      ${del ? `<div class="rule-del"><span>Excluir esta regra? A Fátima deixa de usá-la.</span><button type="button" class="btn btn-ghost btn-sm" data-rule-delno="1">Cancelar</button><button type="button" class="btn btn-danger btn-sm" data-rule-delsim="${r.id}">Excluir</button></div>`
       : `<div class="rule-f"><small>${r.ativo ? 'Ativa' : 'Desligada'} · atualizada ${esc(ago(r.atualizado_em))}</small><div class="rule-btns">
         <button type="button" class="icon-btn sm" data-rule-mover="up:${r.id}" aria-label="Subir regra"${i === 0 ? ' disabled' : ''}>${icon('i-up')}</button>
         <button type="button" class="icon-btn sm" data-rule-mover="down:${r.id}" aria-label="Descer regra"${i === n - 1 ? ' disabled' : ''}>${icon('i-down')}</button>
@@ -1495,13 +1506,13 @@
   }
   function renderContexto(el, head) {
     const regras = S.ctx;
-    const intro = `<div class="ctx-intro"><span class="ctx-ic">${icon('i-chat')}</span><p><b>A Maria lê estas regras a cada mensagem.</b> Ex.: dor na perna → clínico geral. Escreva, ligue ou desligue e reordene: o que você salvar vale já na próxima mensagem do paciente.</p></div>`;
+    const intro = `<div class="ctx-intro"><span class="ctx-ic">${icon('i-chat')}</span><p><b>A Fátima lê estas regras a cada mensagem.</b> Ex.: dor na perna → clínico geral. Escreva, ligue ou desligue e reordene: o que você salvar vale já na próxima mensagem do paciente.</p></div>`;
     if (!regras) { el.innerHTML = head + intro + '<div class="sk sk-box"></div>'; return; }
     const ativas = regras.filter((r) => r.ativo).length;
     const lista = regras.map((r, i) => ruleCard(r, i, regras.length)).join('');
     el.innerHTML = head + intro + `<div class="ctx-grid"><div class="ctx-main">
       <div class="ctx-bar"><span>${regras.length} ${regras.length === 1 ? 'regra' : 'regras'} · ${ativas} ${ativas === 1 ? 'ativa' : 'ativas'}</span><button class="btn btn-primary btn-sm" type="button" data-rule-new="1">${icon('i-plus')}Nova regra</button></div>
-      ${S.ctxEdit === 'novo' ? ruleForm(null) : ''}${lista || (S.ctxEdit === 'novo' ? '' : '<div class="empty"><strong>Nenhuma regra ainda</strong>Crie a primeira regra para ensinar a Maria, por exemplo qual médico atende cada sintoma.<br><button class="btn btn-primary btn-sm" type="button" data-rule-new="1">Nova regra</button></div>')}</div>${diagnostico()}</div>`;
+      ${S.ctxEdit === 'novo' ? ruleForm(null) : ''}${lista || (S.ctxEdit === 'novo' ? '' : '<div class="empty"><strong>Nenhuma regra ainda</strong>Crie a primeira regra para ensinar a Fátima, por exemplo qual médico atende cada sintoma.<br><button class="btn btn-primary btn-sm" type="button" data-rule-new="1">Nova regra</button></div>')}</div>${diagnostico()}</div>`;
     if (S.ctxEdit) { const f = el.querySelector('[data-rule-form] [name=titulo]'); if (f && !f.dataset.focado) { f.dataset.focado = '1'; f.focus(); } }
   }
   function carregaContexto() {
@@ -1512,7 +1523,7 @@
     const body = { titulo: form.titulo.value.trim(), categoria: form.categoria.value, conteudo: form.conteudo.value.trim(), ativo: form.ativo.checked };
     err.hidden = true;
     if (body.titulo.length < 2) { err.textContent = 'Dê um título curto para a regra.'; err.hidden = false; return; }
-    if (!body.conteudo) { err.textContent = 'Escreva o texto da regra para a Maria.'; err.hidden = false; return; }
+    if (!body.conteudo) { err.textContent = 'Escreva o texto da regra para a Fátima.'; err.hidden = false; return; }
     btn.disabled = true; btn.innerHTML = '<span class="spin"></span> Salvando...';
     try {
       if (id === 'novo') await api('POST', '/api/contexto', body); else await api('PATCH', `/api/contexto?id=${id}`, body);
@@ -1534,7 +1545,7 @@
       const ds = t.closest('[data-rule-delsim]');
       if (ds) {
         ds.disabled = true;
-        try { await api('DELETE', `/api/contexto?id=${ds.dataset.ruleDelsim}`); S.ctxDel = null; toast('Regra excluída. A Maria deixa de usá-la.'); await carregaContexto(); }
+        try { await api('DELETE', `/api/contexto?id=${ds.dataset.ruleDelsim}`); S.ctxDel = null; toast('Regra excluída. A Fátima deixa de usá-la.'); await carregaContexto(); }
         catch (er) { ds.disabled = false; if (er.status !== 401) toast(msgErro(er), 'err'); }
         return;
       }
@@ -1594,6 +1605,7 @@
       novaConsulta({ data: d, hora: fmtMin(m), servico: pr ? pr.servico : undefined });
       return;
     }
+    const rp = t.closest('[data-robo-pausa]'); if (rp) { roboPausa(rp.dataset.leadId, rp.dataset.roboPausa === '1', rp); return; }
     const rs = t.closest('[data-resolver]'); if (rs) { resolverHumano(rs.dataset.resolver, rs); return; }
   });
   document.addEventListener('change', (e) => {
@@ -1791,7 +1803,7 @@
     }
     const CTX0 = [
       { id: 1, titulo: 'Triagem: qual médico para cada sintoma', conteudo: 'Dor no corpo (perna, costas, cabeça), febre, gripe, pressão, diabetes, check-up → clínico geral.\nDor de dente, limpeza, aparelho, implante → avaliação odontológica gratuita.\nCriança → pediatria (segunda, quarta e sexta de manhã).', categoria: 'triagem', ativo: true, ordem: 1 },
-      { id: 2, titulo: 'Tom de voz', conteudo: 'Fale como a Maria da recepção: acolhedora, simples, sem termos técnicos. Paciente com pressa recebe resposta curta.', categoria: 'atendimento', ativo: true, ordem: 2 },
+      { id: 2, titulo: 'Tom de voz', conteudo: 'Fale como a Fátima da recepção: acolhedora, simples, sem termos técnicos. Paciente com pressa recebe resposta curta.', categoria: 'atendimento', ativo: true, ordem: 2 },
       { id: 3, titulo: 'Exames: preparo', conteudo: 'Não informe jejum nem preparo de exame. Diga que a recepção confirma o preparo na hora de agendar.', categoria: 'regras', ativo: true, ordem: 3 },
       { id: 4, titulo: 'Endereço e horário', conteudo: 'Atendemos de segunda a sexta, das 8h às 18h, e aos sábados até as 12h, em Sobradinho (DF).', categoria: 'informacoes', ativo: false, ordem: 4 }
     ].map((r) => Object.assign(r, { atualizado_em: new Date(Date.now() - 3600000 * 30).toISOString() }));
