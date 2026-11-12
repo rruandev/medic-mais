@@ -11,6 +11,13 @@ export function sql() {
 }
 export const q = (text, params = []) => sql().query(text, params);
 
+/** Coluna que o robô consulta: true = a recepção assumiu e a Fátima não responde esse paciente. Cria sozinha na primeira vez. */
+let colunaPausa;
+export function garantePausa() {
+  colunaPausa ||= q('alter table leads add column if not exists robo_pausado boolean not null default false').catch((e) => { colunaPausa = undefined; throw e; });
+  return colunaPausa;
+}
+
 export class HttpError extends Error {
   constructor(status, message, extra) { super(message); this.status = status; this.extra = extra; }
 }

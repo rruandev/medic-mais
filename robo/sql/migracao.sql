@@ -2,6 +2,7 @@
 -- Nada aqui envia mensagem: só cria onde guardar.
 
 -- 1) Memória do paciente (completa a tabela leads que já existe)
+alter table leads add column if not exists robo_pausado boolean not null default false; -- botão Assumir conversa do painel: true = robô não responde
 alter table leads add column if not exists dor text;
 alter table leads add column if not exists impacto text;
 alter table leads add column if not exists ha_quanto_tempo text;
