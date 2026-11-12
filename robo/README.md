@@ -65,3 +65,7 @@ texto com variação, e "SAIR" desliga o paciente para sempre. Cada tipo tem cha
 ## Modelo de IA
 Manter o modelo atual (z.ai GLM) com a busca: o contexto ficou ~10x menor, que era o que deixava lento e caro.
 Só subir de modelo se, no teste das objeções, ele errar regra (preço de odonto, inventar desconto). A troca é só no nó da IA.
+
+## Consulta de orçamento pelo nome (somente leitura)
+`orcamento.cjs` + `testes/testar-orcamento.cjs`. O paciente informa nome completo + data de nascimento; o robô busca no Sigma por aniversário (o Sigma não busca por nome), confere o nome aqui e só revela se houver UM cadastro. 0 ou 2+ achados = mesma resposta neutra (2+ chama humano). Nada é gravado.
+**Antes de ligar:** os nomes dos campos e parâmetros de `/paciente` e `/orcamento` são palpites (mapas `PARAMS`/`CAMPOS` no topo do arquivo); conferir com uma leitura real e ajustar. No n8n: ferramenta `consultar_orcamento` chamando `consultar({nome, mensagem, sigmaGet})`.
