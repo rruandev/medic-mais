@@ -41,9 +41,10 @@ Tudo sai da fila `envios_ativos`. Cada tipo tem chave própria no `config` (come
 O número está no WAHA (não oficial): nenhuma trava zera o risco, só a API oficial da Meta. Estas fecham tudo que depende de nós:
 | Trava | Onde | Valor |
 |---|---|---|
-| Só para quem já mandou mensagem para a clínica (boleto, reativação, campanha) | `motivoInelegivel` + `ativo_historico()` | contato frio nunca recebe |
-| No máximo 1 mensagem automática por paciente por dia | idem | `ativos_hoje` |
-| Para quem ignorou as 2 últimas mensagens automáticas | idem | `sem_resposta >= 2` |
+| Reativação e campanha só para quem já mandou mensagem para a clínica | `motivoInelegivel` + `ativo_historico()` | contato frio não recebe marketing |
+| **Cobrança de boleto não pula ninguém**: envia, adia (recepção atendendo / conversa em andamento) ou manda para a recepção ligar (sem celular, sem WhatsApp, pediu para não receber) | `decidirBoleto`, `ordenarCobranca` | fila do mais atrasado ao mais novo |
+| No máximo 1 mensagem automática por paciente por dia (não vale para boleto) | idem | `ativos_hoje` |
+| Para quem ignorou as 2 últimas mensagens automáticas (não vale para boleto) | idem | `sem_resposta >= 2` |
 | Não interrompe conversa em andamento nem paciente que a recepção assumiu | idem | 12 h / `robo_pausado` |
 | Só celular brasileiro válido (55 + DDD + 9 dígitos) | `celularBR` | fixo não recebe |
 | Horário: segunda a sábado, 8h às 19h, fora de feriados | `podeEnviar` | `ativo_janela`, `ativo_feriados` |
@@ -64,7 +65,7 @@ e mostrar "digitando" por 2 a 4 s (`/api/startTyping`) antes da mensagem. Toda m
 | Follow-up | 24 h e 72 h depois de conversa sem agendamento (máx. 2) | `leads` etapa conversando/orcamento | volta para a conversa normal |
 | "Me chama sexta" | data que o paciente pediu | `leads.proximo_contato` | idem |
 | Exames pendentes | 2 dias após consulta com exame pedido | recepção marca no painel (Sigma não informa pedido de exame) | agenda coleta |
-| Aviso de boleto | 1 dia antes, no vencimento, 1 a 4 dias depois e 5 a 10 dias depois (última automática; depois só a recepção). Só para quem já conversou com a clínica | Boletos em aberto do Sigma (**endpoint ainda a confirmar com o suporte**) ou planilha da recepção | Nunca negocia: "paguei", desconto, parcelamento ou "sem condições" vão para humano (`lerRespostaBoleto`) |
+| Cobrança de boleto | 1 dia antes, no vencimento, 1 a 4 dias depois e uma última com 5 dias ou mais (boleto antigo recebe 1 aviso quando ligar). Para TODOS os boletos em aberto; depois do último, a recepção cobra | Boletos em aberto do Sigma (**endpoint ainda a confirmar com o suporte**) ou planilha da recepção | Nunca negocia: "paguei", desconto, parcelamento ou "sem condições" vão para humano (`lerRespostaBoleto`) |
 | Reativação | paciente sem consulta há meses | só quem já conversou com a clínica; máx. 10/dia | **cada envio precisa do OK do Ribeiro** |
 | Campanha / repescagem (ex.: Saúde Day) | quando a clínica pedir | só quem já conversou com a clínica | **cada campanha precisa do OK do Ribeiro antes de sair** |
 

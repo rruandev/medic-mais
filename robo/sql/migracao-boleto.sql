@@ -2,21 +2,21 @@
 -- Nada aqui envia mensagem. Só libera os tipos novos, cria a consulta de histórico e grava limites conservadores.
 -- Pode rodar de novo sem estragar nada.
 
--- 1) Tipos novos na fila + status "pulado" (com motivo) para auditar o que a trava barrou
+-- 1) Tipos novos na fila + status "recepcao" (cobrança que o robô não alcança: a recepção liga) e "pulado" (outras mensagens barradas pela trava)
 alter table envios_ativos drop constraint if exists envios_ativos_tipo_check;
 alter table envios_ativos add constraint envios_ativos_tipo_check check (tipo in
   ('confirmacao','lembrete_dia','falta','followup','exames','retorno','campanha',
    'reativacao','boleto_antes','boleto_vence','boleto_atraso_1','boleto_atraso_5'));
 alter table envios_ativos drop constraint if exists envios_ativos_status_check;
 alter table envios_ativos add constraint envios_ativos_status_check check (status in
-  ('pendente','aprovado','enviado','respondido','cancelado','erro','pulado'));
-alter table envios_ativos add column if not exists motivo text;          -- por que foi pulado ou deu erro
+  ('pendente','aprovado','enviado','respondido','cancelado','erro','pulado','recepcao'));
+alter table envios_ativos add column if not exists motivo text;          -- por que foi para a recepção, pulado ou deu erro
 alter table envios_ativos add column if not exists liberado_em timestamptz; -- próximo envio só depois disso (intervalo aleatório)
 alter table envios_ativos add column if not exists link text;               -- link/linha digitável do boleto: a Fátima manda quando o paciente pedir
 create index if not exists envios_ativos_tel on envios_ativos (telefone, enviado_em);
 
 -- 2) Histórico do paciente para a trava (ativo.cjs → motivoInelegivel). Uso no n8n: select * from ativo_historico('5561999990000');
---    ja_conversou   : o paciente já mandou mensagem para o número da clínica (sem isso, boleto/reativação/campanha NÃO saem)
+--    ja_conversou   : o paciente já mandou mensagem para o número da clínica (sem isso, reativação/campanha NÃO saem; boleto sai para todos)
 --    ativos_hoje    : mensagens automáticas que ele já recebeu hoje (máximo 1 por dia)
 --    sem_resposta   : mensagens automáticas enviadas desde a última vez que ele escreveu (2 ou mais = parar)
 --    conversa_aberta: ele escreveu nas últimas 12 h (não interromper conversa em andamento)

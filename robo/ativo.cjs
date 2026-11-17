@@ -114,8 +114,8 @@ function etapaBoleto(vencimento, hoje) {
   if (dif === 1) return 'boleto_antes';
   if (dif === 0) return 'boleto_vence';
   if (dif <= -1 && dif >= -4) return 'boleto_atraso_1';
-  if (dif <= -5 && dif >= -10) return 'boleto_atraso_5';
-  return null; // longe do vencimento ou atraso grande: só a recepção cuida
+  if (dif <= -5) return 'boleto_atraso_5'; // inclui boleto vencido há muito tempo: recebe 1 aviso quando a cobrança for ligada
+  return null; // ainda longe do vencimento (2 dias ou mais): espera
 }
 
 // Boleto só entra na fila se estiver aberto, com valor, vencimento e telefone.
@@ -163,13 +163,31 @@ function podeEnviar(agora, cfg = {}, enviadosHoje = 0, ultimoEnvio = null, extra
   return { ok: true };
 }
 
-// Celular brasileiro com DDI: 55 + DDD + 9 + 8 dígitos. Fixo ou número torto não recebe disparo.
+// Celular brasileiro com DDI: 55 + DDD + 9 + 8 dígitos.
 const celularBR = (t) => /^55[1-9]\d9\d{8}$/.test(String(t || '').replace(/\D/g, ''));
-const FRIOS = new Set(['campanha', 'reativacao', 'boleto_antes', 'boleto_vence', 'boleto_atraso_1', 'boleto_atraso_5']);
+const FRIOS = new Set(['campanha', 'reativacao']); // marketing: só para quem já conversou com a clínica
+const BOLETO = new Set(['boleto_antes', 'boleto_vence', 'boleto_atraso_1', 'boleto_atraso_5']);
 
-// Por que NÃO enviar para este paciente (null = pode). hist vem de `select * from ativo_historico(telefone)`:
-// { ja_conversou, ativos_hoje, sem_resposta, conversa_aberta }.
+// COBRANÇA DE BOLETO: ninguém é pulado. Ligou o botão, todo boleto em aberto é cobrado.
+// acao 'enviar'   → vai para a fila.
+// acao 'adiar'    → tenta de novo na próxima rodada (a recepção está falando com ele ou ele está conversando agora).
+// acao 'recepcao' → o robô não consegue mandar; entra na lista da recepção para ligar (sem celular válido,
+//                    número sem WhatsApp, ou o paciente pediu para não receber mensagem automática).
+function decidirBoleto(lead, hist = {}) {
+  if (!lead || !celularBR(lead.telefone)) return { acao: 'recepcao', motivo: 'sem celular válido: recepção liga' };
+  if (lead.aceita_avisos === false) return { acao: 'recepcao', motivo: 'pediu para não receber mensagem automática: recepção liga' };
+  if (lead.robo_pausado === true) return { acao: 'adiar', motivo: 'recepção está atendendo este paciente agora' };
+  if (hist.conversa_aberta) return { acao: 'adiar', motivo: 'paciente está conversando agora' };
+  return { acao: 'enviar', motivo: null };
+}
+
+// Ordem da fila de cobrança: o mais atrasado primeiro, para o teto do dia nunca deixar dívida antiga para trás.
+const ordenarCobranca = (boletos) => [...boletos].sort((x, y) => String(x.vencimento).localeCompare(String(y.vencimento)));
+
+// Demais mensagens automáticas (confirmação, follow-up, reativação, campanha): por que NÃO enviar (null = pode).
+// hist vem de `select * from ativo_historico(telefone)`: { ja_conversou, ativos_hoje, sem_resposta, conversa_aberta }.
 function motivoInelegivel(lead, tipo, hist = {}) {
+  if (BOLETO.has(tipo)) { const d = decidirBoleto(lead, hist); return d.acao === 'enviar' ? null : d.motivo; }
   if (!lead) return 'sem cadastro';
   if (lead.aceita_avisos === false) return 'pediu SAIR';
   if (lead.robo_pausado === true) return 'recepção assumiu a conversa';
@@ -187,4 +205,4 @@ const elegivel = (lead, tipo, hist) => motivoInelegivel(lead, tipo, hist) === nu
 const linkNoPrimeiroAviso = (cfg = {}) => String(cfg.ativo_boleto_link || 'resposta') === 'sempre';
 
 module.exports = { TEXTOS, PADRAO, montar, lerResposta, lerRespostaBoleto, etapaBoleto, boletoValido, brl, intervaloSorteado,
-  podeEnviar, elegivel, motivoInelegivel, celularBR, linkNoPrimeiroAviso, primeiroNome };
+  podeEnviar, elegivel, motivoInelegivel, decidirBoleto, ordenarCobranca, celularBR, linkNoPrimeiroAviso, primeiroNome };

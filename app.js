@@ -236,7 +236,7 @@
   }
   /* Mensagens automáticas (confirmação de consulta e follow-up): liga/desliga + o que saiu. */
   const TIPO_ATIVO = { confirmacao: 'Confirmação de consulta', lembrete_dia: 'Lembrete do dia', falta: 'Faltou', followup: 'Follow-up', exames: 'Exames', retorno: 'Retorno', campanha: 'Campanha', reativacao: 'Reativação', boleto_antes: 'Boleto (vence amanhã)', boleto_vence: 'Boleto (vence hoje)', boleto_atraso_1: 'Boleto (venceu)', boleto_atraso_5: 'Boleto (última tentativa)' };
-  const ST_ATIVO = { pendente: 'na fila', aprovado: 'aprovado', enviado: 'enviado', respondido: 'respondeu', cancelado: 'cancelado', erro: 'erro' };
+  const ST_ATIVO = { pendente: 'na fila', aprovado: 'aprovado', enviado: 'enviado', respondido: 'respondeu', cancelado: 'cancelado', erro: 'erro', pulado: 'não enviado', recepcao: 'recepção liga' };
   function loadAtivos() {
     return api('GET', '/api/robo?parte=ativos').then((r) => { S.ativos = r; renderAtivos(); }).catch(() => { const el = $('tr-ativos'); if (el) el.innerHTML = '<p class="tr-nota">Não consegui carregar agora. O painel tenta de novo sozinho.</p>'; });
   }
@@ -246,7 +246,7 @@
     const quando = (x) => x ? new Date(x).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : '';
     el.innerHTML = chave('confirmacao', 'Confirmação de consulta', 'Véspera da consulta (agenda do Sigma). Paciente responde 1, 2 ou 3.') +
       chave('followup', 'Follow-up', 'Conversa parou sem agendar: chama em 24 h e, por último, em 72 h.') +
-      chave('boleto', 'Aviso de boleto', 'Avisa 1 dia antes, no vencimento, 1 dia depois e 5 dias depois. Não negocia: dúvida ou pedido de desconto vai para a recepção.') +
+      chave('boleto', 'Cobrança de boleto', 'Ligado: cobra todos os boletos em aberto, do mais atrasado ao mais novo (1 dia antes, no vencimento e depois de vencido). A Fátima só cobra; negociação vai para a recepção. Quem o robô não alcança aparece como "recepção liga".') +
       `<div class="at-linha"><div><b>Campanha</b><small>Só com o OK da agência a cada envio.</small></div><span class="tag">${a.campanha ? 'liberada' : 'sob aprovação'}</span></div>
       <p class="tr-nota at-regra">Envios só de ${esc(a.janela.replace('-', ' às '))}, de segunda a sábado, até ${a.limite_dia} por dia. Hoje: ${a.enviados_hoje}. Quem responder SAIR não recebe mais.</p>
       <h4 class="tr-g">Últimos envios</h4>` +
