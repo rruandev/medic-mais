@@ -1,5 +1,5 @@
 {
-  "nota": "Textos das mensagens automáticas. Campos: {ola} (Bom dia, Nome!), {nome}, {profissional}, {quando}, {hora}, {assunto}. Cada tipo pode ter mais de uma versão; o robô sorteia uma. Boleto: {valor} (R$ 1.234,50), {vencimento} (dd/mm), {descricao} (opcional) e {link} (link ou linha digitável do boleto).",
+  "nota": "Textos das mensagens automáticas. Campos: {ola} (Bom dia, Nome!), {nome}, {profissional}, {quando}, {hora}, {assunto}. Cada tipo pode ter mais de uma versão; o robô sorteia uma. Boleto: {valor} (R$ 1.234,50), {vencimento} (dd/mm), {descricao} (opcional) e {segunda_via} (por padrão: convite para o paciente responder; o link só vai depois da resposta). Os textos que saem de verdade ficam em robo/ativo.cjs.",
   "tipos": {
     "confirmacao": {
       "nome": "Confirmação de consulta (véspera)",
@@ -61,25 +61,33 @@
     "boleto_antes": {
       "nome": "Boleto: vence amanhã",
       "textos": [
-        "{ola} Aqui é a Fátima, do atendimento da MedicMais 💙 Passando para avisar que o boleto de {valor}, referente a {descricao}, vence amanhã, dia {vencimento}.\n\n{link}\n\nSe você já pagou, pode desconsiderar este aviso."
+        "{ola} Aqui é a Fátima, do atendimento da MedicMais 💙 Passando para avisar que o boleto de {valor}, referente a {descricao}, vence amanhã, dia {vencimento}.\n\n{segunda_via}\n\nSe você já pagou, pode desconsiderar.",
+        "{ola} É a Fátima, da MedicMais Sobradinho. Só um lembrete: amanhã, dia {vencimento}, vence o boleto de {valor}, referente a {descricao}.\n\n{segunda_via}\n\nSe já estiver pago, desconsidere, tá bom?",
+        "{ola} Tudo bem? Aqui é a Fátima, da MedicMais 💙 Lembrando que o seu boleto de {valor}, referente a {descricao}, tem vencimento amanhã ({vencimento}).\n\n{segunda_via}\n\nCaso já tenha pago, pode ignorar esta mensagem."
       ]
     },
     "boleto_vence": {
       "nome": "Boleto: vence hoje",
       "textos": [
-        "{ola} Aqui é a Fátima, da MedicMais. O boleto de {valor}, referente a {descricao}, vence hoje.\n\n{link}\n\nSe você já pagou, pode desconsiderar este aviso."
+        "{ola} Aqui é a Fátima, da MedicMais. O boleto de {valor}, referente a {descricao}, vence hoje.\n\n{segunda_via}\n\nSe você já pagou, pode desconsiderar.",
+        "{ola} É a Fátima, do atendimento da MedicMais 💙 Passando para lembrar que hoje é o vencimento do boleto de {valor}, referente a {descricao}.\n\n{segunda_via}\n\nSe já estiver pago, desconsidere.",
+        "{ola} Tudo bem? Aqui é a Fátima, da MedicMais. Hoje vence o seu boleto de {valor}, referente a {descricao}.\n\n{segunda_via}\n\nCaso já tenha pago, pode ignorar esta mensagem."
       ]
     },
     "boleto_atraso_1": {
       "nome": "Boleto: venceu (1 a 4 dias)",
       "textos": [
-        "{ola} Aqui é a Fátima, do atendimento da MedicMais 💙 O boleto de {valor}, referente a {descricao}, venceu no dia {vencimento} e ainda não aparece como pago. Às vezes o pagamento demora um dia para cair.\n\n{link}\n\nSe já pagou, me avise que eu peço para a equipe conferir. Se tiver alguma dificuldade, pode me contar."
+        "{ola} Aqui é a Fátima, do atendimento da MedicMais 💙 O boleto de {valor}, referente a {descricao}, venceu no dia {vencimento} e ainda não aparece como pago. Às vezes o pagamento demora um dia para cair.\n\n{segunda_via}\n\nSe já pagou, me avise que eu peço para a equipe conferir.",
+        "{ola} É a Fátima, da MedicMais Sobradinho. Notamos que o boleto de {valor}, referente a {descricao}, com vencimento em {vencimento}, ainda está em aberto no nosso sistema.\n\n{segunda_via}\n\nSe você já pagou, me avise que a equipe confere.",
+        "{ola} Tudo bem? Aqui é a Fátima, da MedicMais 💙 O boleto de {valor}, referente a {descricao}, que venceu em {vencimento} ainda não consta como pago. Pode ser só a compensação do banco.\n\n{segunda_via}\n\nSe já pagou, é só me avisar."
       ]
     },
     "boleto_atraso_5": {
       "nome": "Boleto: última tentativa (5 dias ou mais)",
       "textos": [
-        "{ola} Tudo bem? O boleto de {valor}, referente a {descricao}, que venceu no dia {vencimento} continua em aberto. Se houver algum problema, me conte que eu aviso a nossa equipe para ajudar você.\n\n{link}"
+        "{ola} Tudo bem? Aqui é a Fátima, da MedicMais. O boleto de {valor}, referente a {descricao}, que venceu no dia {vencimento} continua em aberto. Se houver algum problema, me conte que eu aviso a nossa equipe para ajudar você.\n\n{segunda_via}",
+        "{ola} É a Fátima, do atendimento da MedicMais 💙 O boleto de {valor}, referente a {descricao}, vencido em {vencimento}, ainda aparece em aberto. Se precisar de ajuda com ele, me fala que eu chamo a equipe.\n\n{segunda_via}",
+        "{ola} Aqui é a Fátima, da MedicMais Sobradinho. Seu boleto de {valor}, referente a {descricao}, com vencimento em {vencimento} segue em aberto. Qualquer dificuldade, me conta que a nossa equipe ajuda.\n\n{segunda_via}"
       ]
     }
   }

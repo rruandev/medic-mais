@@ -34,5 +34,41 @@ ok(a.boletoValido({ telefone: '5561999990000', vencimento: '2026-11-20', valor: 
 ok(!a.boletoValido({ telefone: '5561999990000', vencimento: '2026-11-20', valor: 100, situacao: 'pago' }), 'boleto pago não vale');
 ok(!a.boletoValido({ telefone: '', vencimento: '2026-11-20', valor: 100 }) && !a.boletoValido({ telefone: '1', vencimento: '20/11', valor: 100 }) && !a.boletoValido({ telefone: '1', vencimento: '2026-11-20', valor: 0 }), 'boleto incompleto não vale');
 ok(!a.elegivel({ aceita_avisos: false }, 'boleto_antes') && !a.elegivel({ ja_conversou: false }, 'reativacao') && a.elegivel({ ja_conversou: true }, 'reativacao'), 'elegibilidade');
+// --- travas anti-bloqueio ---
+const QUENTE = { telefone: '5561999990000', ja_conversou: true };
+const H = { ja_conversou: true, ativos_hoje: 0, sem_resposta: 0, conversa_aberta: false };
+const mi = (l, t, h) => a.motivoInelegivel(l, t, h);
+ok(mi(QUENTE, 'boleto_antes', H) === null, 'paciente quente recebe boleto');
+ok(/frio/.test(mi({ telefone: '5561999990000' }, 'boleto_antes', { ...H, ja_conversou: false })), 'boleto NÃO vai para quem nunca falou');
+ok(/frio/.test(mi({ telefone: '5561999990000' }, 'reativacao', { ...H, ja_conversou: false })), 'reativação NÃO vai para contato frio');
+ok(/hoje/.test(mi(QUENTE, 'boleto_vence', { ...H, ativos_hoje: 1 })), '1 mensagem automática por paciente por dia');
+ok(/ignorou/.test(mi(QUENTE, 'boleto_atraso_1', { ...H, sem_resposta: 2 })), 'para quem ignorou 2 mensagens');
+ok(/conversando/.test(mi(QUENTE, 'boleto_antes', { ...H, conversa_aberta: true })), 'não interrompe conversa');
+ok(/recepção/.test(mi({ ...QUENTE, robo_pausado: true }, 'boleto_antes', H)), 'não envia se a recepção assumiu');
+ok(/SAIR/.test(mi({ ...QUENTE, aceita_avisos: false }, 'confirmacao', H)), 'SAIR bloqueia tudo');
+ok(/celular/.test(mi({ telefone: '556133334444', ja_conversou: true }, 'boleto_antes', H)), 'fixo não recebe');
+ok(/celular/.test(mi({ telefone: '61999990000', ja_conversou: true }, 'boleto_antes', H)), 'sem DDI não recebe');
+ok(a.celularBR('+55 (61) 99999-0000'), 'celular formatado vale');
+const C = { janela: '08:00-19:00', limite_dia: 30, limite_hora: 10, intervalo_min_s: 40, intervalo_max_s: 120, max_erros: 3, feriados: '2026-11-20' };
+const seg10h = new Date('2026-11-16T13:00:00Z');
+ok(a.podeEnviar(seg10h, C, 0, null).ok, 'segunda 10h com tudo zerado pode');
+ok(!a.podeEnviar(new Date('2026-11-20T13:00:00Z'), C, 0, null).ok, 'feriado não');
+ok(!a.podeEnviar(seg10h, C, 30, null).ok, 'limite do dia 30');
+ok(!a.podeEnviar(seg10h, C, 5, null, { enviados_ultima_hora: 10 }).ok, 'limite da hora');
+ok(/disjuntor/.test(a.podeEnviar(seg10h, C, 0, null, { erros_recentes: 3 }).motivo), 'disjuntor para tudo');
+ok(!a.podeEnviar(seg10h, C, 1, null, { liberado_em: new Date('2026-11-16T13:01:00Z') }).ok, 'respeita intervalo sorteado');
+ok(!a.podeEnviar(seg10h, C, 1, new Date('2026-11-16T12:59:30Z')).ok, 'piso de 40 s mesmo sem liberado_em');
+const ints = [0, 0.25, 0.5, 0.75, 0.999].map((r) => a.intervaloSorteado(C, r));
+ok(ints.every((x) => x >= 40 && x <= 120) && new Set(ints).size === 5, 'intervalo aleatório entre 40 e 120 s: ' + ints);
+ok(a.PADRAO.limite_dia === 30 && a.podeEnviar(seg10h, {}, 30, null).ok === false, 'padrão seguro sem config');
+ok(!a.linkNoPrimeiroAviso({}) && a.linkNoPrimeiroAviso({ ativo_boleto_link: 'sempre' }), 'link só depois da resposta, por padrão');
+const semLink = a.montar('boleto_antes', { nome: 'Ana', valor: 150, vencimento_iso: '2026-11-18' }, 0);
+ok(!/https?:/.test(semLink) && /segunda via/.test(semLink), 'aviso sem link convida a responder');
+for (const t of ['boleto_antes', 'boleto_vence', 'boleto_atraso_1', 'boleto_atraso_5']) {
+  ok(a.TEXTOS[t].length >= 3, t + ' tem 3 versões');
+  const v = new Set([0, 0.5, 0.9].map((r) => a.montar(t, { nome: 'Ana', valor: 150, vencimento_iso: '2026-11-18', descricao: 'retorno' }, r)));
+  ok(v.size === 3 && [...v].every((m) => !/,,|undefined/.test(m)), t + ' versões distintas e sem erro de texto');
+}
+ok(a.lerRespostaBoleto('sim') === 'segunda_via' && a.lerRespostaBoleto('pode mandar') === 'segunda_via', '"sim" pede a 2ª via');
 console.log(falhas ? `${falhas} falha(s)` : 'ativo: tudo certo');
 process.exitCode = falhas ? 1 : 0;

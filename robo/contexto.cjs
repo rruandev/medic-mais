@@ -73,7 +73,8 @@ function montarContexto({ agora = new Date(), mensagens = [], lead = {}, envioAt
 
   if (envioAtivo) {
     linhas.push(`COMO COMEÇOU: a clínica mandou a primeira mensagem (${envioAtivo.tipo}) ${haQuanto(agora, envioAtivo.enviado_em || agora)}: "${String(envioAtivo.texto).slice(0, 200)}". ` +
-      'O paciente está respondendo a isso.');
+      'O paciente está respondendo a isso.' +
+      (envioAtivo.link ? ` SEGUNDA VIA DO BOLETO (mande só se ele pedir ou aceitar): ${envioAtivo.link}` : ''));
   } else if (atual.length) {
     linhas.push(`COMO COMEÇOU: o paciente puxou a conversa ${haQuanto(agora, atual[0].criado_em)} às ${br(atual[0].criado_em).toISOString().slice(11, 16)}.`);
   }

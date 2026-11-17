@@ -26,7 +26,7 @@ async function lerAtivos() {
     followup: cfg.ativo_followup === 'true',
     boleto: cfg.ativo_boleto === 'true',
     campanha: cfg.ativo_campanha === 'true',
-    limite_dia: Number(cfg.ativo_limite_dia || 80),
+    limite_dia: Number(cfg.ativo_limite_dia || 30),
     janela: cfg.ativo_janela || '08:00-19:00',
     enviados_hoje: hoje,
     envios: envios.map((e) => ({ ...e, telefone: String(e.telefone || '').replace(/\d(?=\d{4})/g, '•') }))

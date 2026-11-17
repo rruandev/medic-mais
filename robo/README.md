@@ -35,8 +35,26 @@ Os originais ficam na pasta do projeto (`clientes/medicmais/ensinamentos-robo/`)
 Trava anti-loop continua: 1 resposta por mensagem, não responde a si mesmo, botão liga/desliga do painel.
 
 ## Mensagens ativas (o robô também puxa conversa)
-Tudo sai da fila `envios_ativos`, com 1 envio a cada 45 s, só de segunda a sábado das 8h às 19h, teto de 80 por dia,
-texto com variação, e "SAIR" desliga o paciente para sempre. Cada tipo tem chave própria no `config` (começam desligadas).
+Tudo sai da fila `envios_ativos`. Cada tipo tem chave própria no `config` (começam desligadas).
+
+### Travas anti-bloqueio (obrigatórias em TODO envio automático)
+O número está no WAHA (não oficial): nenhuma trava zera o risco, só a API oficial da Meta. Estas fecham tudo que depende de nós:
+| Trava | Onde | Valor |
+|---|---|---|
+| Só para quem já mandou mensagem para a clínica (boleto, reativação, campanha) | `motivoInelegivel` + `ativo_historico()` | contato frio nunca recebe |
+| No máximo 1 mensagem automática por paciente por dia | idem | `ativos_hoje` |
+| Para quem ignorou as 2 últimas mensagens automáticas | idem | `sem_resposta >= 2` |
+| Não interrompe conversa em andamento nem paciente que a recepção assumiu | idem | 12 h / `robo_pausado` |
+| Só celular brasileiro válido (55 + DDD + 9 dígitos) | `celularBR` | fixo não recebe |
+| Horário: segunda a sábado, 8h às 19h, fora de feriados | `podeEnviar` | `ativo_janela`, `ativo_feriados` |
+| Teto por dia e por hora | `podeEnviar` | 30/dia (aquecimento), 10/hora |
+| Intervalo ALEATÓRIO entre envios | `intervaloSorteado` → `liberado_em` | 40 a 120 s |
+| Disjuntor: 3 falhas de envio → para o dia e avisa | `podeEnviar` | `ativo_max_erros` |
+| Boleto sem link no 1º aviso: paciente responde e recebe a 2ª via | `linkNoPrimeiroAviso` | `ativo_boleto_link = resposta` |
+| 3 versões de texto por aviso, sorteadas | `TEXTOS` | |
+| "SAIR" desliga o paciente para sempre | `lerResposta*` → `aceita_avisos = false` | |
+No WAHA, antes de cada envio: conferir se o número tem WhatsApp (`/api/contacts/check-exists`; se não tiver, marcar `pulado`, não enviar)
+e mostrar "digitando" por 2 a 4 s (`/api/startTyping`) antes da mensagem. Toda mensagem barrada vira `status = 'pulado'` com `motivo`.
 
 | Tipo | Quando | Fonte | Ação com a resposta |
 |---|---|---|---|
@@ -46,8 +64,8 @@ texto com variação, e "SAIR" desliga o paciente para sempre. Cada tipo tem cha
 | Follow-up | 24 h e 72 h depois de conversa sem agendamento (máx. 2) | `leads` etapa conversando/orcamento | volta para a conversa normal |
 | "Me chama sexta" | data que o paciente pediu | `leads.proximo_contato` | idem |
 | Exames pendentes | 2 dias após consulta com exame pedido | recepção marca no painel (Sigma não informa pedido de exame) | agenda coleta |
-| Aviso de boleto | 1 dia antes, no vencimento, 1 a 4 dias depois e 5 a 10 dias depois (última automática; depois só a recepção) | Boletos em aberto do Sigma (**endpoint ainda a confirmar com o suporte**) ou planilha da recepção | Nunca negocia: "paguei", desconto, parcelamento ou "sem condições" vão para humano (`lerRespostaBoleto`) |
-| Reativação | paciente sem consulta há meses | só quem já conversou com a clínica; máx. 15/dia | **cada envio precisa do OK do Ribeiro** |
+| Aviso de boleto | 1 dia antes, no vencimento, 1 a 4 dias depois e 5 a 10 dias depois (última automática; depois só a recepção). Só para quem já conversou com a clínica | Boletos em aberto do Sigma (**endpoint ainda a confirmar com o suporte**) ou planilha da recepção | Nunca negocia: "paguei", desconto, parcelamento ou "sem condições" vão para humano (`lerRespostaBoleto`) |
+| Reativação | paciente sem consulta há meses | só quem já conversou com a clínica; máx. 10/dia | **cada envio precisa do OK do Ribeiro** |
 | Campanha / repescagem (ex.: Saúde Day) | quando a clínica pedir | só quem já conversou com a clínica | **cada campanha precisa do OK do Ribeiro antes de sair** |
 
 ### Boleto: como ligar (nada sai antes disso)
@@ -57,6 +75,7 @@ texto com variação, e "SAIR" desliga o paciente para sempre. Cada tipo tem cha
 3. No n8n, um fluxo diário às 9h: para cada boleto, `boletoValido(b)` e `etapaBoleto(b.vencimento, hoje)`; se houver etapa, `montar(etapa, {...})` e inserir em `envios_ativos` com `ref = b.ref`.
    Antes de CADA envio, reconferir na fonte que o boleto continua em aberto.
 4. Ligar "Aviso de boleto" no painel só depois de testar com o número do Ribeiro e de um boleto de teste.
+Ao inserir na fila, gravar o link do boleto na coluna `link` (a Fátima manda quando o paciente pedir).
 Respostas: `lerRespostaBoleto` (nunca `lerResposta`: "não consigo pagar" viraria cancelar consulta). Quem responder SAIR deixa de receber tudo.
 Cobrança é dado pessoal sensível ao paciente: sem negociar por WhatsApp, e a clínica precisa estar ciente do envio (LGPD).
 
