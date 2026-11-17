@@ -1,4 +1,4 @@
-// Contexto de tempo e de conversa para a Maria.
+// Contexto de tempo e de conversa para a Fátima.
 // Problema que resolve: sem isso a IA recebe o histórico como um chat só e, duas semanas depois,
 // responde como se fosse a mesma conversa ("como te falei...", retoma pedido velho, não sabe que dia é).
 // Regra: um "atendimento" acaba depois de 12 h sem mensagem. A IA recebe só as mensagens do atendimento atual;
@@ -54,7 +54,7 @@ function separarAtendimento(mensagens, agora, pausaH = PAUSA_NOVO_ATENDIMENTO_H)
 function montarContexto({ agora = new Date(), mensagens = [], lead = {}, envioAtivo = null, agendamentos = [] }) {
   const { atual, antigas } = separarAtendimento(mensagens, agora);
   const linhas = [`HOJE: ${agoraPorExtenso(agora)}. Use isso para "amanhã", "sexta", "semana que vem".`,
-    `SAUDAÇÃO CERTA AGORA: "${saudacao(agora)}". Em conversa nova, comece com ela (ex.: "${saudacao(agora)}${lead.nome ? ', ' + String(lead.nome).split(' ')[0] : ''}! Tudo bem? Aqui é a Maria, do atendimento da MedicMais 💙"). Não use saudação de outro período.`];
+    `SAUDAÇÃO CERTA AGORA: "${saudacao(agora)}". Em conversa nova, comece com ela (ex.: "${saudacao(agora)}${lead.nome ? ', ' + String(lead.nome).split(' ')[0] : ''}! Tudo bem? Aqui é a Fátima, do atendimento da MedicMais 💙"). Não use saudação de outro período.`];
 
   linhas.push(lead.nome ? `PACIENTE: ${lead.nome}${lead.telefone ? ' (' + lead.telefone + ')' : ''}.` : 'PACIENTE: nome ainda não informado.');
 
@@ -73,7 +73,8 @@ function montarContexto({ agora = new Date(), mensagens = [], lead = {}, envioAt
 
   if (envioAtivo) {
     linhas.push(`COMO COMEÇOU: a clínica mandou a primeira mensagem (${envioAtivo.tipo}) ${haQuanto(agora, envioAtivo.enviado_em || agora)}: "${String(envioAtivo.texto).slice(0, 200)}". ` +
-      'O paciente está respondendo a isso.');
+      'O paciente está respondendo a isso.' +
+      (envioAtivo.link ? ` SEGUNDA VIA DO BOLETO (mande só se ele pedir ou aceitar): ${envioAtivo.link}` : ''));
   } else if (atual.length) {
     linhas.push(`COMO COMEÇOU: o paciente puxou a conversa ${haQuanto(agora, atual[0].criado_em)} às ${br(atual[0].criado_em).toISOString().slice(11, 16)}.`);
   }

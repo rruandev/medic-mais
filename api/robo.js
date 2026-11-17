@@ -8,9 +8,9 @@ const ler = async () => {
 };
 
 
-/** Mensagens ativas da Maria (confirmação de consulta, follow-up). O n8n lê as chaves ativo_* da tabela config
+/** Mensagens ativas da Fátima (confirmação de consulta, follow-up). O n8n lê as chaves ativo_* da tabela config
     antes de cada envio. Campanha em massa não liga por aqui: cada campanha precisa do OK do Ribeiro. */
-const TIPOS = { confirmacao: 'ativo_confirmacao', followup: 'ativo_followup' };
+const TIPOS = { confirmacao: 'ativo_confirmacao', followup: 'ativo_followup', boleto: 'ativo_boleto' };
 
 async function lerAtivos() {
   const cfg = Object.fromEntries((await q("select chave, valor from config where chave like 'ativo\\_%'")).map((r) => [r.chave, String(r.valor)]));
@@ -24,8 +24,9 @@ async function lerAtivos() {
   return {
     confirmacao: cfg.ativo_confirmacao === 'true',
     followup: cfg.ativo_followup === 'true',
+    boleto: cfg.ativo_boleto === 'true',
     campanha: cfg.ativo_campanha === 'true',
-    limite_dia: Number(cfg.ativo_limite_dia || 80),
+    limite_dia: Number(cfg.ativo_limite_dia || 30),
     janela: cfg.ativo_janela || '08:00-19:00',
     enviados_hoje: hoje,
     envios: envios.map((e) => ({ ...e, telefone: String(e.telefone || '').replace(/\d(?=\d{4})/g, '•') }))
@@ -40,7 +41,7 @@ export default rota({
   POST: async ({ query, body }) => {
     if (query.parte === 'ativos') {
       const chave = TIPOS[body.tipo];
-      if (!chave) throw new HttpError(400, 'Tipo inválido. Use confirmacao ou followup.');
+      if (!chave) throw new HttpError(400, 'Tipo inválido. Use confirmacao, followup ou boleto.');
       if (typeof body.ativo !== 'boolean') throw new HttpError(400, 'Informe ativo: true ou false.');
       await q('insert into config (chave, valor) values ($1, $2) on conflict (chave) do update set valor = excluded.valor', [chave, String(body.ativo)]);
       return lerAtivos();
