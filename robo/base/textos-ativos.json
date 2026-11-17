@@ -1,31 +1,86 @@
 {
-  "nota": "Textos das mensagens automáticas. Campos: {ola} (Bom dia, Nome!), {nome}, {profissional}, {quando}, {hora}, {assunto}. Cada tipo pode ter mais de uma versão; o robô sorteia uma.",
+  "nota": "Textos das mensagens automáticas. Campos: {ola} (Bom dia, Nome!), {nome}, {profissional}, {quando}, {hora}, {assunto}. Cada tipo pode ter mais de uma versão; o robô sorteia uma. Boleto: {valor} (R$ 1.234,50), {vencimento} (dd/mm), {descricao} (opcional) e {link} (link ou linha digitável do boleto).",
   "tipos": {
-    "confirmacao": { "nome": "Confirmação de consulta (véspera)", "textos": [
-      "{ola} Aqui é a Maria, do atendimento da MedicMais Sobradinho 💙\nPassando para confirmar sua consulta com {profissional} {quando}, às {hora}.\n\nResponda:\n1 - Confirmo\n2 - Preciso remarcar\n3 - Não vou poder ir",
-      "{ola} É a Maria, do atendimento da MedicMais Sobradinho 💙\nSua consulta com {profissional} está marcada para {quando}, às {hora}. Posso confirmar?\n\n1 - Sim, confirmo\n2 - Quero remarcar\n3 - Não poderei ir"
-    ] },
-    "lembrete_dia": { "nome": "Lembrete no dia", "textos": [
-      "{ola} Te esperamos hoje às {hora} com {profissional} na MedicMais Sobradinho 💙 Se puder, chegue 10 minutinhos antes."
-    ] },
-    "falta": { "nome": "Paciente faltou", "textos": [
-      "{ola} Aqui é a Maria, do atendimento da MedicMais. Sentimos sua falta na consulta de ontem com {profissional}. Está tudo bem? Quer que eu veja um novo horário pra você?"
-    ] },
-    "followup": { "nome": "Follow-up (24 h sem agendar)", "textos": [
-      "{ola} Aqui é a Maria, do atendimento da MedicMais 💙 Ficou alguma dúvida sobre {assunto}? Se quiser, já vejo um horário pra você.",
-      "{ola} Passando para saber se consigo te ajudar com {assunto}. Tenho horários essa semana, prefere manhã ou tarde?"
-    ] },
-    "followup_2": { "nome": "Follow-up final (72 h)", "textos": [
-      "{ola} Não quero te incomodar, é só para não deixar você sem resposta. Quando quiser cuidar de {assunto}, é só me chamar aqui 💙"
-    ] },
-    "pediu_para_chamar": { "nome": "Pediu para chamar depois", "textos": [
-      "{ola} Combinamos de conversar hoje 😊 Aqui é a Maria, do atendimento da MedicMais. Vamos ver aquele horário para {assunto}? Prefere manhã ou tarde?"
-    ] },
-    "exames": { "nome": "Exames pedidos e não feitos", "textos": [
-      "{ola} Aqui é a Maria, do atendimento da MedicMais 💙 Vi que o(a) {profissional} pediu alguns exames. Quer que eu já deixe sua coleta agendada? A análise é da DASA e a nossa enfermeira tem a mão leve 😉"
-    ] },
-    "retorno": { "nome": "Retorno com resultados", "textos": [
-      "{ola} Seus exames já ficaram prontos? Lembrando que você pode voltar para mostrar os resultados ao médico. Quer que eu reserve seu retorno?"
-    ] }
+    "confirmacao": {
+      "nome": "Confirmação de consulta (véspera)",
+      "textos": [
+        "{ola} Aqui é a Fátima, do atendimento da MedicMais Sobradinho 💙\nPassando para confirmar sua consulta com {profissional} {quando}, às {hora}.\n\nResponda:\n1 - Confirmo\n2 - Preciso remarcar\n3 - Não vou poder ir",
+        "{ola} É a Fátima, do atendimento da MedicMais Sobradinho 💙\nSua consulta com {profissional} está marcada para {quando}, às {hora}. Posso confirmar?\n\n1 - Sim, confirmo\n2 - Quero remarcar\n3 - Não poderei ir"
+      ]
+    },
+    "lembrete_dia": {
+      "nome": "Lembrete no dia",
+      "textos": [
+        "{ola} Te esperamos hoje às {hora} com {profissional} na MedicMais Sobradinho 💙 Se puder, chegue 10 minutinhos antes."
+      ]
+    },
+    "falta": {
+      "nome": "Paciente faltou",
+      "textos": [
+        "{ola} Aqui é a Fátima, do atendimento da MedicMais. Sentimos sua falta na consulta de ontem com {profissional}. Está tudo bem? Quer que eu veja um novo horário pra você?"
+      ]
+    },
+    "followup": {
+      "nome": "Follow-up (24 h sem agendar)",
+      "textos": [
+        "{ola} Aqui é a Fátima, do atendimento da MedicMais 💙 Ficou alguma dúvida sobre {assunto}? Se quiser, já vejo um horário pra você.",
+        "{ola} Passando para saber se consigo te ajudar com {assunto}. Tenho horários essa semana, prefere manhã ou tarde?"
+      ]
+    },
+    "followup_2": {
+      "nome": "Follow-up final (72 h)",
+      "textos": [
+        "{ola} Não quero te incomodar, é só para não deixar você sem resposta. Quando quiser cuidar de {assunto}, é só me chamar aqui 💙"
+      ]
+    },
+    "pediu_para_chamar": {
+      "nome": "Pediu para chamar depois",
+      "textos": [
+        "{ola} Combinamos de conversar hoje 😊 Aqui é a Fátima, do atendimento da MedicMais. Vamos ver aquele horário para {assunto}? Prefere manhã ou tarde?"
+      ]
+    },
+    "exames": {
+      "nome": "Exames pedidos e não feitos",
+      "textos": [
+        "{ola} Aqui é a Fátima, do atendimento da MedicMais 💙 Vi que o(a) {profissional} pediu alguns exames. Quer que eu já deixe sua coleta agendada? A análise é da DASA e a nossa enfermeira tem a mão leve 😉"
+      ]
+    },
+    "retorno": {
+      "nome": "Retorno com resultados",
+      "textos": [
+        "{ola} Seus exames já ficaram prontos? Lembrando que você pode voltar para mostrar os resultados ao médico. Quer que eu reserve seu retorno?"
+      ]
+    },
+    "reativacao": {
+      "nome": "Reativação (sumiu há meses)",
+      "textos": [
+        "{ola} Aqui é a Fátima, do atendimento da MedicMais 💙 Faz um tempinho que não te vemos por aqui e quis saber como você está. Se precisar de consulta, de exame ou de cuidar dos dentes, posso ver um horário pra você.",
+        "{ola} É a Fátima, da MedicMais Sobradinho. Passando para saber se está tudo bem com você. Quando quiser marcar uma consulta ou um exame, é só me chamar aqui 💙"
+      ]
+    },
+    "boleto_antes": {
+      "nome": "Boleto: vence amanhã",
+      "textos": [
+        "{ola} Aqui é a Fátima, do atendimento da MedicMais 💙 Passando para avisar que o boleto de {valor}, referente a {descricao}, vence amanhã, dia {vencimento}.\n\n{link}\n\nSe você já pagou, pode desconsiderar este aviso."
+      ]
+    },
+    "boleto_vence": {
+      "nome": "Boleto: vence hoje",
+      "textos": [
+        "{ola} Aqui é a Fátima, da MedicMais. O boleto de {valor}, referente a {descricao}, vence hoje.\n\n{link}\n\nSe você já pagou, pode desconsiderar este aviso."
+      ]
+    },
+    "boleto_atraso_1": {
+      "nome": "Boleto: venceu (1 a 4 dias)",
+      "textos": [
+        "{ola} Aqui é a Fátima, do atendimento da MedicMais 💙 O boleto de {valor}, referente a {descricao}, venceu no dia {vencimento} e ainda não aparece como pago. Às vezes o pagamento demora um dia para cair.\n\n{link}\n\nSe já pagou, me avise que eu peço para a equipe conferir. Se tiver alguma dificuldade, pode me contar."
+      ]
+    },
+    "boleto_atraso_5": {
+      "nome": "Boleto: última tentativa (5 dias ou mais)",
+      "textos": [
+        "{ola} Tudo bem? O boleto de {valor}, referente a {descricao}, que venceu no dia {vencimento} continua em aberto. Se houver algum problema, me conte que eu aviso a nossa equipe para ajudar você.\n\n{link}"
+      ]
+    }
   }
 }
