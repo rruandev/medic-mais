@@ -4,6 +4,7 @@
   'use strict';
   const qs = new URLSearchParams(location.search);
   const DEMO = qs.get('demo') === '1';
+  document.documentElement.classList.toggle('modo-demo', DEMO); /* aviso "Demonstração" só aparece no ?demo=1 */
   const TZ = 'America/Sao_Paulo';
   const POLL_MS = 5000;
   const $ = (id) => document.getElementById(id);
@@ -98,6 +99,15 @@
   const origemTag = (o, cls) => `<span class="${cls || 'dir'} o-${o}">${o === 'recepcao' ? icon('i-user') : ''}${ORIGEM[o]}</span>`;
   const initials = (n) => String(n || '?').replace(/\(.*?\)/g, '').trim().split(/\s+/).slice(0, 2).map((p) => p[0] || '').join('').toUpperCase() || '?';
   const nomeOuFone = (nome, tel) => (nome && nome.trim()) || fmtPhone(tel);
+  /* Paciente que pediu humano e mandou a última mensagem: há quanto tempo está sem resposta (alerta a partir de 20 min). */
+  const ESPERA_ALERTA_MIN = 20;
+  function esperaHumano(c) {
+    if (!c.precisa_humano || c.ultima_direcao !== 'in' || !c.ultima_em) return '';
+    const min = Math.floor((Date.now() - new Date(c.ultima_em).getTime()) / 60000);
+    if (min < ESPERA_ALERTA_MIN) return '';
+    const txt = min < 60 ? min + ' min' : min < 1440 ? Math.floor(min / 60) + ' h' : Math.floor(min / 1440) + (min < 2880 ? ' dia' : ' dias');
+    return `<span class="tag atraso" title="Paciente esperando resposta da recepção">Sem resposta há ${txt}</span>`;
+  }
   const primeiroNome = (n) => String(n || '').replace(/\(.*?\)/g, '').trim().split(/\s+/)[0] || '';
   const pCor = (p) => (p && /^#[0-9a-f]{6}$/i.test(p.cor) ? p.cor : '#686C6E');
   const pStyle = (p) => `--sv:${pCor(p)};--svt:color-mix(in srgb, ${pCor(p)} 14%, #fff)`;
@@ -1244,7 +1254,7 @@
     box.innerHTML = lista.map((c) => {
       const hoje = nowSP().d, dia = c.ultima_em ? daySP(c.ultima_em) : '';
       const quando = !c.ultima_em ? '' : dia === hoje ? timeSP(c.ultima_em) : dia === addDays(hoje, -1) ? 'ontem' : fmtDM(dia);
-      return `<button type="button" class="conv${c.telefone === S.chat.tel ? ' sel' : ''}${c.precisa_humano ? ' hum' : ''}" data-open-chat="${esc(c.telefone)}"><span class="av${c.precisa_humano ? ' hum' : ''}">${esc(initials(nomeOuFone(c.nome, c.telefone)))}</span><span class="conv-m"><span class="conv-n"><b>${esc(nomeOuFone(c.nome, c.telefone))}</b><time>${esc(quando)}</time></span><span class="conv-t">${c.ultima_direcao === 'out' ? (c.ultima_origem === 'recepcao' ? 'Recepção: ' : 'Fátima: ') : ''}${esc(previa(c.ultima_texto, c.ultima_midia_tipo) || '(sem texto)')}</span><span class="conv-b">${c.precisa_humano ? '<span class="tag hum">Pediu humano</span>' : ''}${c.etapa ? `<span class="tag">${esc(ETAPA_NOME[c.etapa] || c.etapa)}</span>` : ''}</span></span></button>`;
+      return `<button type="button" class="conv${c.telefone === S.chat.tel ? ' sel' : ''}${c.precisa_humano ? ' hum' : ''}" data-open-chat="${esc(c.telefone)}"><span class="av${c.precisa_humano ? ' hum' : ''}">${esc(initials(nomeOuFone(c.nome, c.telefone)))}</span><span class="conv-m"><span class="conv-n"><b>${esc(nomeOuFone(c.nome, c.telefone))}</b><time>${esc(quando)}</time></span><span class="conv-t">${c.ultima_direcao === 'out' ? (c.ultima_origem === 'recepcao' ? 'Recepção: ' : 'Fátima: ') : ''}${esc(previa(c.ultima_texto, c.ultima_midia_tipo) || '(sem texto)')}</span><span class="conv-b">${c.precisa_humano ? '<span class="tag hum">Pediu humano</span>' : ''}${esperaHumano(c)}${c.etapa ? `<span class="tag">${esc(ETAPA_NOME[c.etapa] || c.etapa)}</span>` : ''}</span></span></button>`;
     }).join('');
     box.scrollTop = scroll;
   }
