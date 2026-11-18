@@ -330,6 +330,7 @@ textarea.inpp{padding:11px 13px;min-height:84px;resize:vertical}
 .tag.ok{background:#e4f3ea;color:#1f6b3f}
 .tag.hum{background:var(--red);color:#fff}
 .tag.hum::before{content:"";width:6px;height:6px;border-radius:50%;background:#fff;animation:pulse2 1.4s infinite}
+.tag.atraso{background:#7A0E14;color:#fff}
 @keyframes pulse2{50%{opacity:.3}}
 .cp-head{display:flex;align-items:center;gap:11px;padding:10px 14px;background:#fff;border-bottom:1px solid var(--line);flex-wrap:wrap}
 .cp-head .back{display:inline-grid}
@@ -647,7 +648,7 @@ textarea.inpp{padding:11px 13px;min-height:84px;resize:vertical}
 .thumb{width:230px;max-width:100%;min-height:90px;background:var(--soft-2)}
 .lightbox img{min-width:min(320px,90%);min-height:200px;background:#fff}
 
-.fonte-sigma .demo-note,.fonte-sigma .demo-strip{display:none!important}
+.fonte-sigma .demo-note,.fonte-sigma .demo-strip,html:not(.modo-demo) .demo-note,html:not(.modo-demo) .demo-strip{display:none!important}
 
 /* Treinamento da Maria */
 .tr-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:16px;align-items:start}
